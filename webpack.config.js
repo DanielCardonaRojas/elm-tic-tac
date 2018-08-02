@@ -37,17 +37,6 @@ module.exports = function(env) {
       }, {
         test: /\.css$/,
         use: ["style-loader", "css-loader"]
-      }, {
-        test: /\.scss$/,
-        use: ["style-loader", "css-loader", "sass-loader"]
-      },
-      { test: /\.(ttf|eot|svg|woff|woff2)(\?v=[0-9]\.[0-9]\.[0-9])?$/, 
-        loader: "file-loader",
-        options: {
-            //emitFile: true,
-            name: '[name].[ext]',
-            outputPath: 'fonts/'
-        }
       },
       {
         test: /\.html$/,

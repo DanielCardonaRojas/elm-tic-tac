@@ -3,6 +3,3 @@ elm-stuff
 node_modules
 *.log
 .env*
-dist
-bower_components
-fonts
