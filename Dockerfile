@@ -20,7 +20,7 @@ COPY . /app
 
 RUN npm run build
 
-RUN npm prune --production
+RUN npm prune --production && rm -rf elm-stuff && rm -rf src
 
 EXPOSE 8000
 
