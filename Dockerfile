@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:alpine
 
 RUN mkdir /app
 
@@ -8,19 +8,12 @@ COPY package.json package.json
 
 COPY package-lock.json package-lock.json
 
+# Skip development dependencies
+ENV NODE_ENV production
+
 RUN npm install
 
-RUN npm install elm
-
-COPY elm-package.json elm-package.json
-
-RUN ./node_modules/.bin/elm-package install -y
-
 COPY . /app
-
-RUN npm run build
-
-RUN npm prune --production && rm -rf elm-stuff && rm -rf src
 
 EXPOSE 8000
 
