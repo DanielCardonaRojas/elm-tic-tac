@@ -4,6 +4,9 @@ require('dotenv').config();
 const StringReplacePlugin = require('string-replace-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
+const DIST_DIR = path.join(__dirname, "dist");
+const CLIENT_DIR = path.join(__dirname, "src");
+
 module.exports = function(env) {
   let dotenv =  new Dotenv();
 
@@ -11,8 +14,8 @@ module.exports = function(env) {
     entry: './js/app.js',
     mode: 'development',
     output: {
-      path: path.resolve(__dirname),
-      filename: 'dist/bundle.js'
+      path: DIST_DIR,
+      filename: 'bundle.js'
     },
     module: {
       rules: [
