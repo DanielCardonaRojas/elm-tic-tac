@@ -1,7 +1,8 @@
 module Model exposing (..)
 
 import Data.Board as Board exposing (Board, Cubic, Flat)
-import Data.Move as Move exposing (Player)
+import Data.Move as Move exposing (Move)
+import Data.Player as Player exposing (Player)
 
 
 type Game
@@ -13,14 +14,14 @@ type alias Model =
     { game : Game
     , turn : Player -- The player next to move
     , winner : Maybe Player
-    , player : Player -- The local player, assigned be websocket server.
+    , player : Maybe Player -- The local player, assigned be websocket server.
     }
 
 
 default : Model
 default =
     { game = Simple <| Board.flat 3
-    , turn = Move.PlayerX
+    , turn = Player.PlayerX
     , winner = Nothing
-    , player = Move.PlayerX
+    , player = Nothing
     }

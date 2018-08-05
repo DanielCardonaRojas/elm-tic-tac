@@ -1,9 +1,9 @@
 module Data.Board
     exposing
         ( Board
+        , BoardIndex
         , Cubic
         , Flat
-        , Positioned3D
         , cubic
         , cubicWin
         , flat
@@ -11,43 +11,21 @@ module Data.Board
         , moves
         , play2D
         , play3D
+        , size
+        , tiles
         )
 
-import Data.Move as Move exposing (Move, Player)
+import Data.Move as Move exposing (Move, Positioned, Positioned3D)
+import Data.Player as Player exposing (Player)
+import List.Extra as List
 import Maybe.Extra as Maybe
 
 
 -- This module does calculations on moves
 
 
-type Board a
-    = Board
-        { size : Int -- this determines the board will be nxn
-        , cubic : Bool -- We can determiner the amount of boards
-        , moves : List Positioned3D
-        }
-
-
-moves : Board a -> List Positioned3D
-moves (Board board) =
-    .moves board
-
-
-type alias Positioned3D =
-    { player : Player
-    , x : Int
-    , y : Int
-    , z : Int
-    }
-
-
-positioned : BoardIndex -> Move -> Positioned3D
-positioned idx move =
-    { player = move.player
-    , x = move.column
-    , y = move.row
-    , z = idx
-    }
+type alias BoardMove =
+    Positioned3D { player : Player }
 
 
 type alias BoardIndex =
@@ -60,6 +38,70 @@ type Flat
 
 type Cubic
     = Cubic
+
+
+type Board a
+    = Board
+        { size : Int -- this determines the board will be nxn
+        , cubic : Bool -- We can determiner the amount of boards
+        , moves : List BoardMove
+        }
+
+
+moves : Board a -> List BoardMove
+moves (Board board) =
+    .moves board
+
+
+size : Board a -> Int
+size (Board board) =
+    .size board
+
+
+positioned : BoardIndex -> Move -> BoardMove
+positioned idx move =
+    { player = move.player
+    , x = move.column
+    , y = move.row
+    , z = idx
+    }
+
+
+tiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
+tiles idx (Board board) =
+    let
+        movesOnBoard =
+            List.filter (\m -> m.z == idx) board.moves
+                |> List.map
+                    (\m ->
+                        { column = m.x
+                        , row = m.y
+                        , player = Just m.player
+                        }
+                    )
+
+        allPositions =
+            let
+                enum =
+                    List.range 0 (board.size - 1)
+            in
+            enum
+                |> List.andThen
+                    (\x ->
+                        enum
+                            |> List.andThen
+                                (\y ->
+                                    [ { column = x, row = y, player = Nothing } ]
+                                )
+                    )
+    in
+    allPositions
+        |> List.map
+            (\p ->
+                List.filter (Move.equallyPositioned p) movesOnBoard
+                    |> List.head
+                    |> Maybe.withDefault p
+            )
 
 
 flat : Int -> Board Flat
@@ -125,7 +167,7 @@ horizontalSlice (Board board) k =
         |> List.map alongRow
 
 
-alongColumn : Positioned3D -> Move
+alongColumn : BoardMove -> Move
 alongColumn pos =
     { player = pos.player
     , column = pos.y
@@ -133,7 +175,7 @@ alongColumn pos =
     }
 
 
-alongRow : Positioned3D -> Move
+alongRow : BoardMove -> Move
 alongRow pos =
     { player = pos.player
     , column = pos.x

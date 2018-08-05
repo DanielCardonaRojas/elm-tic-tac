@@ -14,8 +14,10 @@ module.exports = function(env) {
     entry: './js/app.js',
     mode: 'development',
     output: {
-      path: DIST_DIR,
-      filename: 'bundle.js'
+      //path: DIST_DIR,
+      //filename: 'bundle.js'
+      path: path.resolve(__dirname),
+      filename: 'dist/bundle.js'
     },
     module: {
       rules: [

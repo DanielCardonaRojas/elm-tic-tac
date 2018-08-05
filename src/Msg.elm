@@ -1,6 +1,7 @@
 module Msg exposing (..)
 
 import Data.Move as Move exposing (Move)
+import Data.Player as Player exposing (Player)
 
 
 type Mode
@@ -10,6 +11,6 @@ type Mode
 
 type Msg
     = Switch Mode
-    | Play Move Int
-    | Opponent Move Int
-    | NoOp
+    | Play Move Int -- Local player move
+    | Opponent Move Int -- Remote player move
+    | SetPlayer Player

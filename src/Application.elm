@@ -2,12 +2,14 @@ module Application exposing (main)
 
 import Data.Board as Board
 import Data.Move as Move exposing (Move)
+import Data.Player as Player exposing (Player)
 import Html
 import Model exposing (..)
 import Msg exposing (Msg(..))
 import Ports.Echo as Echo
 import Ports.LocalStorage as LocalStorage
 import Ports.SocketIO as SocketIO
+import Return
 import View
 
 
@@ -17,7 +19,7 @@ main =
         { init = init
         , update = update
         , view = View.view
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
 
 
@@ -25,16 +27,18 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Switch mode ->
-            ( { model | game = createGame mode }, Cmd.none )
+            { model | game = createGame mode } ! []
 
         Play move idx ->
-            ( { model | game = updateGame move idx model.game }, Cmd.none )
+            -- TODO: Emit movement including board index
+            Return.singleton { model | game = updateGame move idx model.game, turn = Player.switch model.turn }
+                |> Return.command (SocketIO.emit "move" <| Move.encode move)
 
         Opponent move idx ->
-            ( { model | game = updateGame move idx model.game }, Cmd.none )
+            { model | game = updateGame move idx model.game, turn = Player.switch model.turn } ! []
 
-        msg ->
-            ( model, Cmd.none )
+        SetPlayer p ->
+            { model | player = Just p } ! []
 
 
 updateGame : Move -> Int -> Game -> Game
@@ -61,4 +65,10 @@ createGame mode =
 
 init : ( Model, Cmd Msg )
 init =
-    Model.default ! []
+    Return.singleton Model.default
+        |> Return.command (SocketIO.connect "")
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
