@@ -1,7 +1,6 @@
 module Model exposing (..)
 
 import Data.Board as Board exposing (Board, Cubic, Flat)
-import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
 
 
@@ -20,7 +19,8 @@ type alias Model =
 
 default : Model
 default =
-    { game = Simple <| Board.flat 3
+    --{ game = Simple <| Board.flat 3
+    { game = Advanced <| Board.cubic 3
     , turn = Player.PlayerX
     , winner = Nothing
     , player = Nothing

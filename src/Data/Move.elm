@@ -46,6 +46,24 @@ encode move =
         ]
 
 
+decode3D : Decoder Move3D
+decode3D =
+    Pipeline.decode (\p c r idx -> { player = p, x = c, y = r, z = idx })
+        |> required "player" Player.decode
+        |> required "column" Decode.int
+        |> required "row" Decode.int
+        |> required "board" Decode.int
+
+
+encode3D : Move3D -> Value
+encode3D move =
+    Encode.object
+        [ ( "player", Player.encode move.player )
+        , ( "column", Encode.int move.x )
+        , ( "row", Encode.int move.y )
+        ]
+
+
 equallyPositioned : Positioned a -> Positioned b -> Bool
 equallyPositioned pos1 pos2 =
     pos1.row == pos2.row && pos1.column == pos2.column
@@ -61,4 +79,13 @@ positioned3D pos =
     { x = pos.x
     , y = pos.y
     , z = pos.z
+    }
+
+
+fromMoveInBoard : Int -> Move -> Positioned3D { player : Player }
+fromMoveInBoard idx move =
+    { player = move.player
+    , x = move.column
+    , y = move.row
+    , z = idx
     }

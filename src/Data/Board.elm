@@ -58,15 +58,6 @@ size (Board board) =
     .size board
 
 
-positioned : BoardIndex -> Move -> BoardMove
-positioned idx move =
-    { player = move.player
-    , x = move.column
-    , y = move.row
-    , z = idx
-    }
-
-
 tiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
 tiles idx (Board board) =
     let
@@ -125,7 +116,7 @@ cubic n =
 play : BoardIndex -> Move -> Board a -> Board a
 play idx move (Board board) =
     Board
-        { board | moves = positioned idx move :: board.moves }
+        { board | moves = Move.fromMoveInBoard idx move :: board.moves }
 
 
 play3D : BoardIndex -> Move -> Board Cubic -> Board Cubic

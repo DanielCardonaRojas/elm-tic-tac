@@ -8,6 +8,21 @@ import Html.Attributes exposing (..)
 import Html.Events as Events exposing (..)
 
 
+boardLayout : Int -> Attribute msg
+boardLayout n =
+    let
+        columnTemplate n =
+            "repeat(" ++ toString n ++ ", 1fr)"
+    in
+    style
+        [ ( "display", "grid" )
+        , ( "grid-template-columns", columnTemplate n )
+        , ( "height", "200px" )
+        , ( "width", "200px" )
+        , ( "margin-bottom", "50px" )
+        ]
+
+
 render3D : (Positioned3D {} -> msg) -> Board Cubic -> Html msg
 render3D tagger board =
     let
@@ -23,7 +38,7 @@ render3D tagger board =
 
         renderBoard n =
             List.map renderEmptyTile (tiles n)
-                |> div [ class "board" ]
+                |> div [ class "board", boardLayout <| Board.size board ]
     in
     List.range 0 (Board.size board - 1)
         |> List.map renderBoard
@@ -45,7 +60,7 @@ render2D tagger board =
                     )
     in
     List.map renderEmptyTile tiles
-        |> div [ class "board" ]
+        |> div [ class "board", boardLayout <| Board.size board ]
 
 
 move : (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Html msg

@@ -32,7 +32,7 @@ update msg model =
         Play move idx ->
             -- TODO: Emit movement including board index
             Return.singleton { model | game = updateGame move idx model.game, turn = Player.switch model.turn }
-                |> Return.command (SocketIO.emit "move" <| Move.encode move)
+                |> Return.command (SocketIO.emit "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
 
         Opponent move idx ->
             { model | game = updateGame move idx model.game, turn = Player.switch model.turn } ! []
