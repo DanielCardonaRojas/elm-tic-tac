@@ -33,7 +33,7 @@ render3D tagger board =
             Board.tiles n board
                 |> List.map
                     (\pos2D ->
-                        { x = pos2D.column, y = pos2D.row, z = n, player = pos2D.player }
+                        { column = pos2D.column, row = pos2D.row, board = n, player = pos2D.player }
                     )
 
         renderBoard n =
@@ -49,14 +49,14 @@ render2D : (Positioned {} -> msg) -> Board Flat -> Html msg
 render2D tagger board =
     let
         renderEmptyTile =
-            move (\xyz -> tagger { column = xyz.x, row = xyz.y })
+            move (\xyz -> tagger { column = xyz.column, row = xyz.row })
 
         tiles =
             Board.tiles 0 board
                 |> Debug.log "Tiles"
                 |> List.map
                     (\pos2D ->
-                        { x = pos2D.column, y = pos2D.row, z = 0, player = pos2D.player }
+                        { column = pos2D.column, row = pos2D.row, board = 0, player = pos2D.player }
                     )
     in
     List.map renderEmptyTile tiles

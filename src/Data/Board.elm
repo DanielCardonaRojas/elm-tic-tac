@@ -62,11 +62,11 @@ tiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
 tiles idx (Board board) =
     let
         movesOnBoard =
-            List.filter (\m -> m.z == idx) board.moves
+            List.filter (\m -> m.board == idx) board.moves
                 |> List.map
                     (\m ->
-                        { column = m.x
-                        , row = m.y
+                        { column = m.column
+                        , row = m.row
                         , player = Just m.player
                         }
                     )
@@ -147,30 +147,30 @@ cubicWin board =
 verticalSlice : Board Cubic -> Int -> List Move
 verticalSlice (Board board) k =
     board.moves
-        |> List.filter (\m -> m.z == k)
+        |> List.filter (\m -> m.board == k)
         |> List.map alongColumn
 
 
 horizontalSlice : Board a -> Int -> List Move
 horizontalSlice (Board board) k =
     board.moves
-        |> List.filter (\m -> m.z == k)
+        |> List.filter (\m -> m.board == k)
         |> List.map alongRow
 
 
 alongColumn : BoardMove -> Move
 alongColumn pos =
     { player = pos.player
-    , column = pos.y
-    , row = pos.z
+    , column = pos.row
+    , row = pos.board
     }
 
 
 alongRow : BoardMove -> Move
 alongRow pos =
     { player = pos.player
-    , column = pos.x
-    , row = pos.y
+    , column = pos.column
+    , row = pos.row
     }
 
 

@@ -40,6 +40,9 @@ update msg model =
         SetPlayer p ->
             { model | player = Just p } ! []
 
+        NoOp ->
+            model ! []
+
 
 updateGame : Move -> Int -> Game -> Game
 updateGame move idx game =
@@ -71,4 +74,14 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
+    let
+        socketIODecoder str =
+            case str of
+                "move" ->
+                    Move.decode3D
+
+                --|> Decode.map (\m -> Play)
+                _ ->
+                    Move.decode3D
+    in
     Sub.none

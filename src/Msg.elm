@@ -14,3 +14,4 @@ type Msg
     | Play Move Int -- Local player move
     | Opponent Move Int -- Remote player move
     | SetPlayer Player
+    | NoOp

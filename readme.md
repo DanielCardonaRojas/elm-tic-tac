@@ -10,7 +10,17 @@ Deployment is done with now.sh so have that first
 
 ```shell
 npm run build
-now run deploy
+npm run deploy
+```
+
+# Run
+
+```shell
+# Serve elm app only with hot reloading
+npm run serve
+
+# Run full app (no hot reloading)
+npm run start
 ```
 
 # Build and run docker image

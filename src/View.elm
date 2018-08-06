@@ -26,6 +26,6 @@ renderGame model =
         Advanced board ->
             Board.render3D
                 (\pos ->
-                    Play { column = pos.x, row = pos.y, player = model.turn } pos.z
+                    Play { column = pos.column, row = pos.row, player = model.turn } pos.board
                 )
                 board
