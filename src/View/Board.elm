@@ -33,7 +33,7 @@ render3D tagger board =
             Board.tiles n board
                 |> List.map
                     (\pos2D ->
-                        { x = pos2D.column, y = pos2D.row, z = 0, player = pos2D.player }
+                        { x = pos2D.column, y = pos2D.row, z = n, player = pos2D.player }
                     )
 
         renderBoard n =
