@@ -14,6 +14,8 @@ type alias Model =
     , turn : Player -- The player next to move
     , winner : Maybe Player
     , player : Maybe Player -- The local player, assigned be websocket server.
+    , opponent : Maybe Player
+    , isReady : Bool
     }
 
 
@@ -24,4 +26,6 @@ default =
     , turn = Player.PlayerX
     , winner = Nothing
     , player = Nothing
+    , opponent = Nothing
+    , isReady = False
     }

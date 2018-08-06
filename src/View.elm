@@ -8,14 +8,34 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Model exposing (..)
 import Msg exposing (Msg(..))
+import Utils
 import View.Board as Board
 
 
 view : Model -> Html Msg
 view model =
+    let
+        joinText =
+            if model.player /= Nothing then
+                text "Waiting for opponent to join"
+            else
+                text "Choose a player"
+
+        mainView =
+            if model.isReady then
+                renderGame model
+            else
+                joinText
+
+        playerStatus =
+            if Utils.shouldStartGame model then
+                text <| "You are player " ++ (Maybe.map Player.toString model.player |> Maybe.withDefault "")
+            else
+                playerPicker model
+    in
     div [ class "elm-tic-tac" ]
-        [ renderGame model
-        , playerPicker model
+        [ mainView
+        , playerStatus
         ]
 
 
@@ -40,15 +60,19 @@ renderGame model =
 playerPicker : Model -> Html Msg
 playerPicker model =
     let
+        activeAttr player =
+            if Maybe.map (\p -> p == player) model.player |> Maybe.withDefault False then
+                [ class "is-active" ]
+            else
+                []
+
+        enabledFor player =
+            Maybe.map (\p -> p /= player) model.opponent
+                |> Maybe.withDefault True
+
         segment player =
             button
-                ((onClick <| SetPlayer player)
-                    :: (if Maybe.map (\p -> p == player) model.player |> Maybe.withDefault False then
-                            [ class "is-active" ]
-                        else
-                            []
-                       )
-                )
+                ((onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
                 [ text <| toString player ]
     in
     div [ class "picker" ]
