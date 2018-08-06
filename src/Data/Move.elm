@@ -15,9 +15,9 @@ type alias Positioned a =
 
 type alias Positioned3D r =
     { r
-        | x : Int
-        , y : Int
-        , z : Int
+        | column : Int
+        , row : Int
+        , board : Int
     }
 
 
@@ -48,7 +48,7 @@ encode move =
 
 decode3D : Decoder Move3D
 decode3D =
-    Pipeline.decode (\p c r idx -> { player = p, x = c, y = r, z = idx })
+    Pipeline.decode (\p c r idx -> { player = p, column = c, row = r, board = idx })
         |> required "player" Player.decode
         |> required "column" Decode.int
         |> required "row" Decode.int
@@ -59,8 +59,9 @@ encode3D : Move3D -> Value
 encode3D move =
     Encode.object
         [ ( "player", Player.encode move.player )
-        , ( "column", Encode.int move.x )
-        , ( "row", Encode.int move.y )
+        , ( "column", Encode.int move.column )
+        , ( "row", Encode.int move.row )
+        , ( "board", Encode.int move.board )
         ]
 
 
@@ -76,16 +77,24 @@ positioned pos =
 
 positioned3D : Positioned3D a -> Positioned3D {}
 positioned3D pos =
-    { x = pos.x
-    , y = pos.y
-    , z = pos.z
+    { column = pos.column
+    , row = pos.row
+    , board = pos.board
     }
 
 
-fromMoveInBoard : Int -> Move -> Positioned3D { player : Player }
+as2D : Move3D -> Move
+as2D pos =
+    { player = pos.player
+    , column = pos.column
+    , row = pos.row
+    }
+
+
+fromMoveInBoard : Int -> Move -> Move3D
 fromMoveInBoard idx move =
     { player = move.player
-    , x = move.column
-    , y = move.row
-    , z = idx
+    , column = move.column
+    , row = move.row
+    , board = idx
     }

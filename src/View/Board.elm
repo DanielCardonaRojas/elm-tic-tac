@@ -27,13 +27,13 @@ render3D : (Positioned3D {} -> msg) -> Board Cubic -> Html msg
 render3D tagger board =
     let
         renderEmptyTile =
-            move tagger
+            move (Board.locked board) tagger
 
         tiles n =
             Board.tiles n board
                 |> List.map
                     (\pos2D ->
-                        { x = pos2D.column, y = pos2D.row, z = n, player = pos2D.player }
+                        { column = pos2D.column, row = pos2D.row, board = n, player = pos2D.player }
                     )
 
         renderBoard n =
@@ -49,32 +49,30 @@ render2D : (Positioned {} -> msg) -> Board Flat -> Html msg
 render2D tagger board =
     let
         renderEmptyTile =
-            move (\xyz -> tagger { column = xyz.x, row = xyz.y })
+            move (Board.locked board) (\xyz -> tagger <| Move.positioned xyz)
 
         tiles =
             Board.tiles 0 board
-                |> Debug.log "Tiles"
                 |> List.map
                     (\pos2D ->
-                        { x = pos2D.column, y = pos2D.row, z = 0, player = pos2D.player }
+                        { column = pos2D.column, row = pos2D.row, board = 0, player = pos2D.player }
                     )
     in
     List.map renderEmptyTile tiles
         |> div [ class "board", boardLayout <| Board.size board ]
 
 
-move : (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Html msg
-move emptyTagger m =
+move : Bool -> (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Html msg
+move enabled emptyTagger m =
     let
         attrs =
             if m.player /= Nothing then
-                [ class "tile" ]
+                []
             else
-                [ class "tile"
-                , onClick <| emptyTagger (Move.positioned3D m)
+                [ onClick <| emptyTagger (Move.positioned3D m)
                 ]
     in
-    button attrs
+    button (class "tile" :: id (toString m) :: (disabled <| not enabled) :: attrs)
         [ Maybe.map Player.toString m.player
             |> Maybe.withDefault ""
             |> text

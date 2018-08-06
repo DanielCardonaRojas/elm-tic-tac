@@ -8,11 +8,15 @@ module Data.Board
         , cubicWin
         , flat
         , flatWin
+        , lock
+        , locked
         , moves
         , play2D
         , play3D
         , size
         , tiles
+        , toggleLock
+        , unlock
         )
 
 import Data.Move as Move exposing (Move, Positioned, Positioned3D)
@@ -45,6 +49,7 @@ type Board a
         { size : Int -- this determines the board will be nxn
         , cubic : Bool -- We can determiner the amount of boards
         , moves : List BoardMove
+        , enabled : Bool
         }
 
 
@@ -58,15 +63,20 @@ size (Board board) =
     .size board
 
 
+locked : Board a -> Bool
+locked (Board board) =
+    .enabled board
+
+
 tiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
 tiles idx (Board board) =
     let
         movesOnBoard =
-            List.filter (\m -> m.z == idx) board.moves
+            List.filter (\m -> m.board == idx) board.moves
                 |> List.map
                     (\m ->
-                        { column = m.x
-                        , row = m.y
+                        { column = m.column
+                        , row = m.row
                         , player = Just m.player
                         }
                     )
@@ -78,11 +88,11 @@ tiles idx (Board board) =
             in
             enum
                 |> List.andThen
-                    (\x ->
+                    (\row ->
                         enum
                             |> List.andThen
-                                (\y ->
-                                    [ { column = x, row = y, player = Nothing } ]
+                                (\col ->
+                                    [ { column = col, row = row, player = Nothing } ]
                                 )
                     )
     in
@@ -101,6 +111,7 @@ flat n =
         { size = n
         , cubic = True
         , moves = []
+        , enabled = True
         }
 
 
@@ -110,7 +121,23 @@ cubic n =
         { size = n
         , cubic = True
         , moves = []
+        , enabled = True
         }
+
+
+lock : Board a -> Board a
+lock (Board board) =
+    Board { board | enabled = False }
+
+
+unlock : Board a -> Board a
+unlock (Board board) =
+    Board { board | enabled = True }
+
+
+toggleLock : Board a -> Board a
+toggleLock (Board board) =
+    Board { board | enabled = not board.enabled }
 
 
 play : BoardIndex -> Move -> Board a -> Board a
@@ -147,30 +174,30 @@ cubicWin board =
 verticalSlice : Board Cubic -> Int -> List Move
 verticalSlice (Board board) k =
     board.moves
-        |> List.filter (\m -> m.z == k)
+        |> List.filter (\m -> m.board == k)
         |> List.map alongColumn
 
 
 horizontalSlice : Board a -> Int -> List Move
 horizontalSlice (Board board) k =
     board.moves
-        |> List.filter (\m -> m.z == k)
+        |> List.filter (\m -> m.board == k)
         |> List.map alongRow
 
 
 alongColumn : BoardMove -> Move
 alongColumn pos =
     { player = pos.player
-    , column = pos.y
-    , row = pos.z
+    , column = pos.row
+    , row = pos.board
     }
 
 
 alongRow : BoardMove -> Move
 alongRow pos =
     { player = pos.player
-    , column = pos.x
-    , row = pos.y
+    , column = pos.column
+    , row = pos.row
     }
 
 

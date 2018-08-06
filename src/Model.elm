@@ -20,7 +20,7 @@ type alias Model =
 default : Model
 default =
     --{ game = Simple <| Board.flat 3
-    { game = Advanced <| Board.cubic 3
+    { game = Advanced <| Board.lock <| Board.cubic 3
     , turn = Player.PlayerX
     , winner = Nothing
     , player = Nothing

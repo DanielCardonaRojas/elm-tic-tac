@@ -40,11 +40,7 @@ app.ports.connect.subscribe(function(str){
     const socket = socketio(str);
     app.ports.emit_.subscribe(function(obj) {
         //Index tuple to extract message event and data
-        var evenTag = obj["event"];
-        var data = obj["data"];
-        console.log("Outgoing event: " + evenTag);
-        console.dir(data);
-        socket.emit(evenTag, data);
+        socket.emit(obj[0], obj[1]);
     });
 
     app.ports.listen.subscribe(function(eventName){
