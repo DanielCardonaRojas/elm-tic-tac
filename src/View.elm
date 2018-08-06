@@ -2,11 +2,12 @@ module View exposing (view)
 
 --import Html.Attributes exposing (..)
 
-import Data.Game as Game exposing (Game, Mode(..))
-import Data.Player as Player
+import Data.Game as Game exposing (Game, Mode(..), Status(..))
+import Data.Player as Player exposing (Player)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
 import Utils
@@ -42,21 +43,61 @@ view model =
 
 renderGame : Model -> Html Msg
 renderGame model =
-    case ( model.game.mode, model.game.win ) of
-        ( _, Just sequence ) ->
-            text <| toString sequence
+    let
+        winTitle winner =
+            Maybe.map
+                (\p ->
+                    if p == winner then
+                        "You win"
+                    else
+                        "You loose"
+                )
+                model.player
+                |> Maybe.withDefault "Tie"
 
-        ( Simple board, _ ) ->
+        rematchButton winner =
+            Maybe.map
+                (\p ->
+                    if p == winner then
+                        text "Waiting for rematch request"
+                    else
+                        button [ onClick <| PlayAgainMulti 3 ] [ text "Rematch" ]
+                )
+                model.player
+                |> Maybe.withDefault (text "Tie")
+    in
+    case Game.status model.game of
+        Winner p moves ->
+            div [ class "gameover" ]
+                [ text <| winTitle p
+                , rematchButton p
+                , text <| toString moves
+                ]
+
+        Tie ->
+            div []
+                [ text "Tie"
+                , button [ onClick <| PlayAgainMulti 3 ] [ text "Play Again" ]
+                ]
+
+        Playing ->
+            renderGameMode model.game model.turn
+
+
+renderGameMode : Game -> Player -> Html Msg
+renderGameMode game nextPlayer =
+    case game.mode of
+        Simple board ->
             Board.render2D
                 (\pos ->
-                    Play { column = pos.column, row = pos.row, player = model.turn } 0
+                    Play { column = pos.column, row = pos.row, player = nextPlayer } 0
                 )
                 board
 
-        ( Advanced board, _ ) ->
+        Advanced board ->
             Board.render3D
                 (\pos ->
-                    Play { column = pos.column, row = pos.row, player = model.turn } pos.board
+                    Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
                 )
                 board
 

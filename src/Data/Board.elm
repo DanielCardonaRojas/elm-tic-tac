@@ -6,6 +6,9 @@ module Data.Board
         , Flat
         , cubic
         , cubicWin
+        , decode
+        , emptySpots
+        , encode
         , flat
         , flatWin
         , lock
@@ -14,6 +17,7 @@ module Data.Board
         , play2D
         , play3D
         , size
+        , spots
         , tiles
         , toggleLock
         , unlock
@@ -21,6 +25,8 @@ module Data.Board
 
 import Data.Move as Move exposing (Move, Move3D, Positioned, Positioned3D)
 import Data.Player as Player exposing (Player)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode exposing (Value)
 import List.Extra as List
 import Maybe.Extra as Maybe
 
@@ -49,6 +55,21 @@ type Board a
         }
 
 
+encode : Board a -> Encode.Value
+encode (Board board) =
+    Encode.object
+        [ ( "size", Encode.int board.size )
+        , ( "cubic", Encode.bool board.cubic )
+        ]
+
+
+decode : Decoder { size : Int, cubic : Bool }
+decode =
+    Decode.map2 (\s c -> { size = s, cubic = c })
+        Decode.int
+        Decode.bool
+
+
 moves : Board a -> List Move3D
 moves (Board board) =
     .moves board
@@ -57,6 +78,19 @@ moves (Board board) =
 size : Board a -> Int
 size (Board board) =
     .size board
+
+
+spots : Board a -> Int
+spots (Board board) =
+    if board.cubic then
+        board.size ^ 3
+    else
+        board.size ^ 2
+
+
+emptySpots : Board a -> Int
+emptySpots board =
+    spots board - List.length (moves board)
 
 
 locked : Board a -> Bool
