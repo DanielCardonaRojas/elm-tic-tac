@@ -29,7 +29,7 @@ view model =
 
         playerStatus =
             if Utils.shouldStartGame model then
-                text <| "You are " ++ toString model.player
+                text <| "You are player " ++ (Maybe.map Player.toString model.player |> Maybe.withDefault "")
             else
                 playerPicker model
     in
