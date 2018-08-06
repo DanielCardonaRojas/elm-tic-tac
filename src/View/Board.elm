@@ -53,7 +53,6 @@ render2D tagger board =
 
         tiles =
             Board.tiles 0 board
-                |> Debug.log "Tiles"
                 |> List.map
                     (\pos2D ->
                         { column = pos2D.column, row = pos2D.row, board = 0, player = pos2D.player }
@@ -68,14 +67,12 @@ move enabled emptyTagger m =
     let
         attrs =
             if m.player /= Nothing then
-                [ class "tile", disabled <| not enabled ]
+                []
             else
-                [ class "tile"
-                , disabled <| not enabled
-                , onClick <| emptyTagger (Move.positioned3D m)
+                [ onClick <| emptyTagger (Move.positioned3D m)
                 ]
     in
-    button attrs
+    button (class "tile" :: id (toString m) :: (disabled <| not enabled) :: attrs)
         [ Maybe.map Player.toString m.player
             |> Maybe.withDefault ""
             |> text

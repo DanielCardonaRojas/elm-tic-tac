@@ -61,6 +61,7 @@ encode3D move =
         [ ( "player", Player.encode move.player )
         , ( "column", Encode.int move.column )
         , ( "row", Encode.int move.row )
+        , ( "board", Encode.int move.board )
         ]
 
 
@@ -76,7 +77,7 @@ positioned pos =
 
 positioned3D : Positioned3D a -> Positioned3D {}
 positioned3D pos =
-    { column = pos.row
+    { column = pos.column
     , row = pos.row
     , board = pos.board
     }

@@ -45,7 +45,17 @@ update msg model =
                 |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
 
         SetPlayer p ->
-            { model | player = Just p } ! []
+            Return.singleton { model | player = Just p }
+                |> Return.map
+                    (\m ->
+                        { m
+                            | game =
+                                if p == model.turn then
+                                    unlockGame m.game
+                                else
+                                    lockGame m.game
+                        }
+                    )
 
         NoOp ->
             model ! []
@@ -100,7 +110,8 @@ createGame mode =
 init : ( Model, Cmd Msg )
 init =
     Return.singleton Model.default
-        |> Return.command (SocketIO.connect "")
+        |> Return.command (SocketIO.connect "http://localhost:8000")
+        |> Return.command (SocketIO.listen "move")
 
 
 subscriptions : Model -> Sub Msg
@@ -110,7 +121,11 @@ subscriptions model =
             case str of
                 _ ->
                     Move.decode3D
-                        |> Decode.map (\m -> Play (Move.as2D m) m.board)
+                        |> Decode.map
+                            (\m ->
+                                Opponent (Move.as2D m) m.board
+                                    |> Debug.log "socket.io move"
+                            )
     in
     Sub.batch
         [ SocketIO.decodeMessage socketIODecoder NoOp

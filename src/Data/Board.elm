@@ -88,11 +88,11 @@ tiles idx (Board board) =
             in
             enum
                 |> List.andThen
-                    (\x ->
+                    (\row ->
                         enum
                             |> List.andThen
-                                (\y ->
-                                    [ { column = x, row = y, player = Nothing } ]
+                                (\col ->
+                                    [ { column = col, row = row, player = Nothing } ]
                                 )
                     )
     in
