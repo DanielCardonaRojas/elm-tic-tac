@@ -1,9 +1,10 @@
 module Application exposing (main)
 
-import Data.Board as Board
+import Data.Board as Board exposing (Board, Cubic, Flat)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
 import Html
+import Json.Decode as Decode exposing (Decoder)
 import Model exposing (..)
 import Msg exposing (Msg(..))
 import Ports.Echo as Echo
@@ -31,11 +32,17 @@ update msg model =
 
         Play move idx ->
             -- TODO: Emit movement including board index
-            Return.singleton { model | game = updateGame move idx model.game, turn = Player.switch model.turn }
+            Return.singleton model.game
+                |> Return.map (updateGame move idx)
+                |> Return.map lockGame
+                |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
                 |> Return.command (SocketIO.emit "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
 
         Opponent move idx ->
-            { model | game = updateGame move idx model.game, turn = Player.switch model.turn } ! []
+            Return.singleton model.game
+                |> Return.map (updateGame move idx)
+                |> Return.map unlockGame
+                |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
 
         SetPlayer p ->
             { model | player = Just p } ! []
@@ -53,6 +60,30 @@ updateGame move idx game =
 
         Advanced board ->
             Board.play3D idx move board
+                |> Advanced
+
+
+lockGame : Game -> Game
+lockGame game =
+    case game of
+        Simple board ->
+            Board.lock board
+                |> Simple
+
+        Advanced board ->
+            Board.lock board
+                |> Advanced
+
+
+unlockGame : Game -> Game
+unlockGame game =
+    case game of
+        Simple board ->
+            Board.unlock board
+                |> Simple
+
+        Advanced board ->
+            Board.unlock board
                 |> Advanced
 
 
@@ -77,11 +108,10 @@ subscriptions model =
     let
         socketIODecoder str =
             case str of
-                "move" ->
-                    Move.decode3D
-
-                --|> Decode.map (\m -> Play)
                 _ ->
                     Move.decode3D
+                        |> Decode.map (\m -> Play (Move.as2D m) m.board)
     in
-    Sub.none
+    Sub.batch
+        [ SocketIO.decodeMessage socketIODecoder NoOp
+        ]

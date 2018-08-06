@@ -8,11 +8,15 @@ module Data.Board
         , cubicWin
         , flat
         , flatWin
+        , lock
+        , locked
         , moves
         , play2D
         , play3D
         , size
         , tiles
+        , toggleLock
+        , unlock
         )
 
 import Data.Move as Move exposing (Move, Positioned, Positioned3D)
@@ -45,6 +49,7 @@ type Board a
         { size : Int -- this determines the board will be nxn
         , cubic : Bool -- We can determiner the amount of boards
         , moves : List BoardMove
+        , enabled : Bool
         }
 
 
@@ -56,6 +61,11 @@ moves (Board board) =
 size : Board a -> Int
 size (Board board) =
     .size board
+
+
+locked : Board a -> Bool
+locked (Board board) =
+    .enabled board
 
 
 tiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
@@ -101,6 +111,7 @@ flat n =
         { size = n
         , cubic = True
         , moves = []
+        , enabled = True
         }
 
 
@@ -110,7 +121,23 @@ cubic n =
         { size = n
         , cubic = True
         , moves = []
+        , enabled = True
         }
+
+
+lock : Board a -> Board a
+lock (Board board) =
+    Board { board | enabled = False }
+
+
+unlock : Board a -> Board a
+unlock (Board board) =
+    Board { board | enabled = True }
+
+
+toggleLock : Board a -> Board a
+toggleLock (Board board) =
+    Board { board | enabled = not board.enabled }
 
 
 play : BoardIndex -> Move -> Board a -> Board a

@@ -82,7 +82,15 @@ positioned3D pos =
     }
 
 
-fromMoveInBoard : Int -> Move -> Positioned3D { player : Player }
+as2D : Move3D -> Move
+as2D pos =
+    { player = pos.player
+    , column = pos.column
+    , row = pos.row
+    }
+
+
+fromMoveInBoard : Int -> Move -> Move3D
 fromMoveInBoard idx move =
     { player = move.player
     , column = move.column

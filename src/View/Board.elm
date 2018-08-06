@@ -27,7 +27,7 @@ render3D : (Positioned3D {} -> msg) -> Board Cubic -> Html msg
 render3D tagger board =
     let
         renderEmptyTile =
-            move tagger
+            move (Board.locked board) tagger
 
         tiles n =
             Board.tiles n board
@@ -49,7 +49,7 @@ render2D : (Positioned {} -> msg) -> Board Flat -> Html msg
 render2D tagger board =
     let
         renderEmptyTile =
-            move (\xyz -> tagger { column = xyz.column, row = xyz.row })
+            move (Board.locked board) (\xyz -> tagger <| Move.positioned xyz)
 
         tiles =
             Board.tiles 0 board
@@ -63,14 +63,15 @@ render2D tagger board =
         |> div [ class "board", boardLayout <| Board.size board ]
 
 
-move : (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Html msg
-move emptyTagger m =
+move : Bool -> (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Html msg
+move enabled emptyTagger m =
     let
         attrs =
             if m.player /= Nothing then
-                [ class "tile" ]
+                [ class "tile", disabled <| not enabled ]
             else
                 [ class "tile"
+                , disabled <| not enabled
                 , onClick <| emptyTagger (Move.positioned3D m)
                 ]
     in
