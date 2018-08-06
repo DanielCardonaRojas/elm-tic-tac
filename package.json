@@ -20,7 +20,7 @@
   "scripts": {
     "start": "node ./server",
     "build": "webpack --verbose",
-    "serve": "webpack-dev-server --host 127.0.0.1 --port 3000 --content-base dist --env.development",
+    "serve": "webpack-dev-server --host 127.0.0.1 --port 3000 --env.development",
     "deploy": "now --docker --public"
   },
   "dependencies": {

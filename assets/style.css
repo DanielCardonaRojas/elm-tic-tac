@@ -1,0 +1,9 @@
+.cube {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+button.is-active {
+    background-color: green;
+}
