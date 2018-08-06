@@ -2,6 +2,7 @@ module View exposing (view)
 
 --import Html.Attributes exposing (..)
 
+import Data.Game as Game exposing (Game, Mode(..))
 import Data.Player as Player
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -41,15 +42,18 @@ view model =
 
 renderGame : Model -> Html Msg
 renderGame model =
-    case model.game of
-        Simple board ->
+    case ( model.game.mode, model.game.win ) of
+        ( _, Just sequence ) ->
+            text <| toString sequence
+
+        ( Simple board, _ ) ->
             Board.render2D
                 (\pos ->
                     Play { column = pos.column, row = pos.row, player = model.turn } 0
                 )
                 board
 
-        Advanced board ->
+        ( Advanced board, _ ) ->
             Board.render3D
                 (\pos ->
                     Play { column = pos.column, row = pos.row, player = model.turn } pos.board

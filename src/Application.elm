@@ -1,6 +1,7 @@
 module Application exposing (main)
 
 import Data.Board as Board exposing (Board, Cubic, Flat)
+import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
 import Html
@@ -30,26 +31,26 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Switch mode ->
-            { model | game = Utils.createGame mode } ! []
+            { model | game = createGame mode } ! []
 
         Play move idx ->
             -- TODO: Emit movement including board index
             Return.singleton model.game
-                |> Return.map (Utils.updateGame move idx)
-                |> Return.map Utils.lockGame
+                |> Return.map (Game.update move idx)
+                |> Return.map Game.lock
                 |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
                 |> Return.command (SocketIO.emit "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
 
         Opponent move idx ->
             Return.singleton model.game
-                |> Return.map (Utils.updateGame move idx)
-                |> Return.map Utils.unlockGame
+                |> Return.map (Game.update move idx)
+                |> Return.map Game.unlock
                 |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
 
         SetPlayer p ->
             Return.singleton { model | player = Just p }
                 |> Return.map (\m -> { m | isReady = Utils.shouldStartGame m })
-                |> Return.map (Utils.enablingGame <| p == model.turn)
+                |> Return.map (\m -> { m | game = Game.enable (p == model.turn) m.game })
                 |> Return.command (SocketIO.emit "join" <| Player.encode p)
 
         SetOponent p ->
@@ -91,3 +92,17 @@ subscriptions model =
     Sub.batch
         [ SocketIO.decodeMessage socketIODecoder NoOp
         ]
+
+
+
+-- Helpers
+
+
+createGame : Msg.Mode -> Game
+createGame mode =
+    case mode of
+        Msg.SingleBoard n ->
+            Game.flat n
+
+        Msg.MultiBoard n ->
+            Game.cubic n
