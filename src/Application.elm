@@ -32,10 +32,15 @@ update msg model =
     case msg of
         -- Remote
         NewGameSingle n ->
-            Return.singleton { model | game = Game.flat n, player = Maybe.map Player.switch model.player }
+            Return.singleton { model | player = Maybe.map Player.switch model.player, game = Game.flat n }
+                |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
+                |> Return.map (\m -> { m | turn = Player.PlayerX })
 
         NewGameMulti n ->
-            Return.singleton { model | game = Game.flat n, player = Maybe.map Player.switch model.player }
+            Return.singleton { model | player = Maybe.map Player.switch model.player, game = Game.cubic n }
+                |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
+                |> Return.map (\m -> { m | turn = Player.PlayerX })
+                |> Debug.log "NewGameMulti"
 
         Opponent move idx ->
             Return.singleton model.game
@@ -50,10 +55,14 @@ update msg model =
         -- Local
         PlayAgainSingle n ->
             Return.singleton { model | game = Game.flat n, player = Maybe.map Player.switch model.player }
+                |> Return.map (\m -> { m | turn = Player.PlayerX })
+                |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
                 |> Return.command (SocketIO.emit "rematch" <| Board.encode <| Board.flat n)
 
         PlayAgainMulti n ->
             Return.singleton { model | game = Game.cubic n, player = Maybe.map Player.switch model.player }
+                |> Return.map (\m -> { m | turn = Player.PlayerX })
+                |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
                 |> Return.command (SocketIO.emit "rematch" <| Board.encode <| Board.cubic n)
 
         Play move idx ->
@@ -77,7 +86,8 @@ update msg model =
 init : ( Model, Cmd Msg )
 init =
     Return.singleton Model.default
-        |> Return.command (SocketIO.connect "http://localhost:8000")
+        --|> Return.command (SocketIO.connect "http://localhost:8000")
+        |> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "join")
         |> Return.command (SocketIO.listen "rematch")
@@ -116,3 +126,9 @@ subscriptions model =
     Sub.batch
         [ SocketIO.decodeMessage socketIODecoder NoOp
         ]
+
+
+isCurrentPlayerTurn : Model -> Bool
+isCurrentPlayerTurn model =
+    Maybe.map (\p -> p == model.turn) model.player
+        |> Maybe.withDefault False

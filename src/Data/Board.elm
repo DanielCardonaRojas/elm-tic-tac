@@ -26,6 +26,7 @@ module Data.Board
 import Data.Move as Move exposing (Move, Move3D, Positioned, Positioned3D)
 import Data.Player as Player exposing (Player)
 import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline as Pipeline exposing (required)
 import Json.Encode as Encode exposing (Value)
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -65,9 +66,9 @@ encode (Board board) =
 
 decode : Decoder { size : Int, cubic : Bool }
 decode =
-    Decode.map2 (\s c -> { size = s, cubic = c })
-        Decode.int
-        Decode.bool
+    Pipeline.decode (\s c -> { size = s, cubic = c } |> Debug.log "Board.decode")
+        |> required "size" Decode.int
+        |> required "cubic" Decode.bool
 
 
 moves : Board a -> List Move3D
@@ -359,10 +360,21 @@ didWin n moves =
             List.filter (\mv -> mv.row == i) moves
                 |> checkpass n
 
-        diagonals =
+        diagonal1 =
             let
                 d1 =
                     List.range 0 (n - 1)
+                        |> List.map2 (\x y -> { column = x, row = y }) (List.range 0 (n - 1))
+            in
+            List.filter (\m -> List.member (Move.positioned m) d1) moves
+                |> checkpass n
+                |> List.singleton
+
+        diagonal2 =
+            let
+                d1 =
+                    List.range 0 (n - 1)
+                        |> List.reverse
                         |> List.map2 (\x y -> { column = x, row = y }) (List.range 0 (n - 1))
             in
             List.filter (\m -> List.member (Move.positioned m) d1) moves
@@ -379,7 +391,8 @@ didWin n moves =
     in
     verticals
         |> List.append horizontals
-        |> List.append diagonals
+        |> List.append diagonal1
+        |> List.append diagonal2
         |> List.filter (\r -> r /= Nothing)
         |> List.head
         |> Maybe.join

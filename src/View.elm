@@ -81,7 +81,8 @@ renderGame model =
                 ]
 
         Playing ->
-            renderGameMode model.game model.turn
+            Maybe.map (renderGameMode model.game) model.player
+                |> Maybe.withDefault (playerPicker model)
 
 
 renderGameMode : Game -> Player -> Html Msg
