@@ -26,4 +26,10 @@ io.on('connection', function (socket) {
         console.log(data);
         socket.broadcast.emit('join', data);
     });
+
+    socket.on('rematch', function(data){
+        console.log("emiting rematch");
+        console.log(data);
+        socket.broadcast.emit('rematch', data);
+    });
 });
