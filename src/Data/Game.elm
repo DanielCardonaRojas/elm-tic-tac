@@ -13,7 +13,7 @@ module Data.Game
 -- This module is a thin wrapper around Board module
 -- to help this be a little easiear to handle in the app
 
-import Data.Board as Board exposing (Board, Cubic, Flat)
+import Data.Board as Board exposing (Board, Cubic, Flat, Spot)
 import Data.Move as Move exposing (Move, Move3D, Positioned3D)
 import Data.Player as Player exposing (Player)
 import Maybe.Extra as Maybe
@@ -27,7 +27,7 @@ type Status
 
 type alias Game =
     { board : Board Cubic
-    , win : Maybe (List Move3D)
+    , win : Maybe ( Player, List Spot )
     }
 
 
@@ -43,24 +43,15 @@ status game =
     let
         fullBoard =
             Board.emptySpots game.board == 0
-
-        player =
-            Maybe.map List.head game.win
-                |> Maybe.join
-                |> Maybe.map .player
-
-        moves =
-            game.win
-                |> Maybe.map (List.map Move.positioned3D)
     in
-    case ( player, moves, fullBoard ) of
-        ( Just p, Just moves, _ ) ->
+    case ( game.win, fullBoard ) of
+        ( Just ( p, moves ), _ ) ->
             Winner p moves
 
-        ( _, _, True ) ->
+        ( _, True ) ->
             Tie
 
-        ( _, _, _ ) ->
+        ( _, _ ) ->
             Playing
 
 
@@ -74,7 +65,23 @@ update move idx game =
 updateWin : Game -> Game
 updateWin game =
     Board.cubicWin game.board
-        |> (\win -> { game | win = win })
+        |> (\win -> { game | win = winning win })
+
+
+winning : Maybe (List Move3D) -> Maybe ( Player, List Spot )
+winning moves =
+    let
+        player =
+            Maybe.map List.head moves
+                |> Maybe.join
+                |> Maybe.map .player
+
+        spots =
+            Maybe.map (List.map Move.positioned3D) moves
+    in
+    Just (,)
+        |> Maybe.andMap player
+        |> Maybe.andMap spots
 
 
 lock : Game -> Game
@@ -89,7 +96,4 @@ unlock game =
 
 enable : Bool -> Game -> Game
 enable bool game =
-    if bool then
-        unlock game
-    else
-        lock game
+    { game | board = Board.enabled bool game.board }
