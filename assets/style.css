@@ -1,7 +1,52 @@
 .cube {
-    display: flex;
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*align-items: center;*/
+    transform: rotate(-20deg);
+}
+
+body {
+    margin: 0;
+}
+
+.elm-tic-tac {
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+    background-color: darkgrey;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    display: flex;
+}
+
+.tile {
+    background-color: #c7c7c7;
+    border-color: transparent;
+    border-width: 0px;
+    color: white;
+}
+
+.tile.playerx {
+    background-color: #ff8585;
+    color: white;
+}
+
+.tile.playero {
+    background-color: aquamarine;
+    color: white;
+}
+
+.board {
+    display: grid;
+    height: 200px;
+    width: 200px;
+    margin-bottom: 30px;
+    grid-gap: 2px;
+}
+
+.board {
+    transform: skew(35deg) translateX(-40px);
 }
 
 button.is-active {

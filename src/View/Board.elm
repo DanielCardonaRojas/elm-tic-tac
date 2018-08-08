@@ -15,11 +15,7 @@ boardLayout n =
             "repeat(" ++ toString n ++ ", 1fr)"
     in
     style
-        [ ( "display", "grid" )
-        , ( "grid-template-columns", columnTemplate n )
-        , ( "height", "200px" )
-        , ( "width", "200px" )
-        , ( "margin-bottom", "50px" )
+        [ ( "grid-template-columns", columnTemplate n )
         ]
 
 
@@ -71,9 +67,10 @@ move enabled emptyTagger m =
             else
                 [ onClick <| emptyTagger (Move.positioned3D m)
                 ]
+
+        tileClass =
+            Maybe.map (String.append "tile " << String.toLower << toString) m.player
+                |> Maybe.withDefault "tile"
     in
-    button (class "tile" :: id (toString m) :: (disabled <| not enabled) :: attrs)
-        [ Maybe.map Player.toString m.player
-            |> Maybe.withDefault ""
-            |> text
-        ]
+    button (class tileClass :: id (toString m) :: (disabled <| not enabled) :: attrs)
+        []

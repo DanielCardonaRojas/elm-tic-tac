@@ -1,6 +1,5 @@
 module Model exposing (..)
 
-import Data.Board as Board exposing (Board, Cubic, Flat)
 import Data.Game as Game exposing (Game)
 import Data.Player as Player exposing (Player)
 

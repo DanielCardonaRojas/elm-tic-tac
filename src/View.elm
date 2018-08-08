@@ -17,17 +17,11 @@ import View.Board as Board
 view : Model -> Html Msg
 view model =
     let
-        joinText =
-            if model.player /= Nothing then
-                text "Waiting for opponent to join"
-            else
-                text "Choose a player"
-
         mainView =
             if model.isReady then
                 renderGame model
             else
-                joinText
+                div [ class "createsession" ] []
 
         playerStatus =
             if Utils.shouldStartGame model then
@@ -65,6 +59,10 @@ renderGame model =
                 )
                 model.player
                 |> Maybe.withDefault (text "Tie")
+
+        lockedBoard =
+            Maybe.map (renderGameMode <| Game.lock model.game) model.player
+                |> Maybe.withDefault (playerPicker model)
     in
     case Game.status model.game of
         Winner p moves ->
@@ -72,12 +70,14 @@ renderGame model =
                 [ text <| winTitle p
                 , rematchButton p
                 , text <| toString moves
+                , lockedBoard
                 ]
 
         Tie ->
             div []
                 [ text "Tie"
                 , button [ onClick <| PlayAgainMulti 3 ] [ text "Play Again" ]
+                , lockedBoard
                 ]
 
         Playing ->
