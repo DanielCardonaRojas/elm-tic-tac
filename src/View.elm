@@ -21,7 +21,7 @@ view model =
             if model.isReady then
                 renderGame model
             else
-                div [ class "createsession" ] []
+                div [ class "createsession" ] [ playerPicker model ]
 
         playerStatus =
             if Utils.shouldStartGame model then
@@ -32,7 +32,7 @@ view model =
     div [ class "elm-tic-tac" ]
         [ span [ class "gametitle" ] [ text "Elm-Tic-Tac" ]
         , mainView
-        , playerStatus
+        , footer
         ]
 
 
@@ -43,18 +43,18 @@ renderGame model =
             Maybe.map
                 (\p ->
                     if p == winner then
-                        "You win"
+                        h2 [] [ text "You win" ]
                     else
-                        "You loose"
+                        h2 [] [ text "You loose" ]
                 )
                 model.player
-                |> Maybe.withDefault "Tie"
+                |> Maybe.withDefault (turnIndicator model)
 
         rematchButton winner =
             Maybe.map
                 (\p ->
                     if p == winner then
-                        text "Waiting for rematch request"
+                        text ""
                     else
                         button [ onClick <| PlayAgainMulti 3 ] [ text "Rematch" ]
                 )
@@ -72,9 +72,8 @@ renderGame model =
     case Game.status model.game of
         Winner p moves ->
             div [ class "game" ]
-                [ text <| winTitle p
+                [ winTitle p
                 , rematchButton p
-                , text <| toString moves
                 , lockedBoard
                 ]
 
@@ -87,8 +86,7 @@ renderGame model =
 
         Playing ->
             div [ class "game" ]
-                [ turnIndicator model
-                , board
+                [ board
                 ]
 
 
@@ -158,3 +156,14 @@ turnIndicator model =
         |> Maybe.andMap model.player
         |> Maybe.andMap (Just model.turn)
         |> Maybe.withDefault (text "Board blocked")
+
+
+footer : Html msg
+footer =
+    div [ class "footer" ]
+        [ span []
+            [ text "The code for this game is open sourced and written in Elm" ]
+        , span
+            []
+            [ text "© 2018 Daniel Cardona Rojas" ]
+        ]

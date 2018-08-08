@@ -1,8 +1,5 @@
 .cube {
-    /*display: flex;*/
-    /*flex-direction: column;*/
-    /*align-items: center;*/
-    transform: rotate(-20deg);
+    transform: rotate(-20deg) translateX(62px);
 }
 
 body {
@@ -19,13 +16,22 @@ body {
     background-color: #778899;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     display: flex;
+}
+
+.game {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    text-align: center;
 }
 
 .gametitle {
     font-size: 2rem;
     color: #00ff7f;
+    margin-top: 1rem;
 }
 
 .picker {
@@ -39,10 +45,23 @@ body {
 
 .picker button {
     margin: 5px 0;
-    padding: 5px;
+    padding: 7px;
     font-family: monospace;
     font-weight: 800;
     font-size: 1rem;
+}
+
+.picker button.is-active {
+    border-color: #778899;
+    border-width: 3px;
+    outline: none;
+}
+
+.picker button:disabled {
+    background-color: light;
+    color: lightgray;
+    background-color: #77889969;
+    border: none;
 }
 
 .tile {
@@ -54,12 +73,12 @@ body {
 
 .tile.playerx, button.playerx {
     background-color: #ff8585;
-    color: white;
+    color: #3c3c3c;
 }
 
 .tile.playero, button.playero {
     background-color: aquamarine;
-    color: white;
+    color: #3c3c3c;
 }
 
 .board {
@@ -74,6 +93,15 @@ body {
     transform: skew(35deg) translateX(-40px);
 }
 
-button.is-active {
-    background-color: green;
+.footer {
+    height: 3rem;
+    background-color: #c7c8c7;
+    color: #3c3c3c;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    align-items: center;
+    justify-content: center;
 }
