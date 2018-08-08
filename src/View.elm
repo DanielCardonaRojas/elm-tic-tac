@@ -30,7 +30,8 @@ view model =
                 playerPicker model
     in
     div [ class "elm-tic-tac" ]
-        [ mainView
+        [ span [ class "gametitle" ] [ text "Elm-Tic-Tac" ]
+        , mainView
         , playerStatus
         ]
 
@@ -63,10 +64,14 @@ renderGame model =
         lockedBoard =
             Maybe.map (renderGameMode <| Game.lock model.game) model.player
                 |> Maybe.withDefault (playerPicker model)
+
+        board =
+            Maybe.map (renderGameMode model.game) model.player
+                |> Maybe.withDefault (playerPicker model)
     in
     case Game.status model.game of
         Winner p moves ->
-            div [ class "gameover" ]
+            div [ class "game" ]
                 [ text <| winTitle p
                 , rematchButton p
                 , text <| toString moves
@@ -74,15 +79,17 @@ renderGame model =
                 ]
 
         Tie ->
-            div []
+            div [ class "game" ]
                 [ text "Tie"
                 , button [ onClick <| PlayAgainMulti 3 ] [ text "Play Again" ]
                 , lockedBoard
                 ]
 
         Playing ->
-            Maybe.map (renderGameMode model.game) model.player
-                |> Maybe.withDefault (playerPicker model)
+            div [ class "game" ]
+                [ turnIndicator model
+                , board
+                ]
 
 
 renderGameMode : Game -> Player -> Html Msg
@@ -122,6 +129,24 @@ playerPicker model =
                 [ text <| toString player ]
     in
     div [ class "picker" ]
-        [ segment Player.PlayerX
+        [ span [] [ text "Choose a player" ]
+        , segment Player.PlayerX
         , segment Player.PlayerO
         ]
+
+
+turnIndicator : Model -> Html Msg
+turnIndicator model =
+    let
+        turnMessage player turn =
+            if player == turn then
+                span [ class "active" ]
+                    [ text "Your turn" ]
+            else
+                span [ class "inactive" ]
+                    [ text "Waiting for opponent move" ]
+    in
+    Just turnMessage
+        |> Maybe.andMap model.player
+        |> Maybe.andMap (Just model.turn)
+        |> Maybe.withDefault (text "Board blocked")
