@@ -28,6 +28,23 @@ body {
     color: #00ff7f;
 }
 
+.picker {
+    display: flex;
+    flex-direction: column;
+    background-color: #c7c7c7;
+    padding: 2rem;
+    font-size: 1rem;
+    border-radius: 6px;
+}
+
+.picker button {
+    margin: 5px 0;
+    padding: 5px;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
 .tile {
     background-color: #c7c7c7;
     border-color: transparent;
@@ -35,12 +52,12 @@ body {
     color: white;
 }
 
-.tile.playerx {
+.tile.playerx, button.playerx {
     background-color: #ff8585;
     color: white;
 }
 
-.tile.playero {
+.tile.playero, button.playero {
     background-color: aquamarine;
     color: white;
 }

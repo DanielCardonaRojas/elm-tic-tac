@@ -119,13 +119,21 @@ playerPicker model =
             else
                 []
 
+        playerClass p =
+            case p of
+                Player.PlayerX ->
+                    class "playerx"
+
+                Player.PlayerO ->
+                    class "playero"
+
         enabledFor player =
             Maybe.map (\p -> p /= player) model.opponent
                 |> Maybe.withDefault True
 
         segment player =
             button
-                ((onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
+                (playerClass player :: (onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
                 [ text <| toString player ]
     in
     div [ class "picker" ]
