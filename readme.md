@@ -1,7 +1,12 @@
+# Play
+
+Play online with a friend [here](https://elm-tic-tac.now.sh/)
+
 # Install dependencies
 
 ```shell
 npm install
+elm-package install -y
 ```
 
 # Deploy 

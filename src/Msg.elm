@@ -4,14 +4,13 @@ import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
 
 
-type Mode
-    = SingleBoard Int
-    | MultiBoard Int
-
-
 type Msg
-    = Switch Mode
-    | Play Move Int -- Local player move
+    = Play Move Int -- Local player move
     | Opponent Move Int -- Remote player move
+    | NewGameSingle Int
+    | NewGameMulti Int
     | SetPlayer Player
+    | SetOponent Player
+    | PlayAgainSingle Int -- Player requests rematch
+    | PlayAgainMulti Int
     | NoOp

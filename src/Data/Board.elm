@@ -6,6 +6,9 @@ module Data.Board
         , Flat
         , cubic
         , cubicWin
+        , decode
+        , emptySpots
+        , encode
         , flat
         , flatWin
         , lock
@@ -14,22 +17,22 @@ module Data.Board
         , play2D
         , play3D
         , size
+        , spots
         , tiles
         , toggleLock
         , unlock
         )
 
-import Data.Move as Move exposing (Move, Positioned, Positioned3D)
+import Data.Move as Move exposing (Move, Move3D, Positioned, Positioned3D)
 import Data.Player as Player exposing (Player)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline as Pipeline exposing (required)
+import Json.Encode as Encode exposing (Value)
 import List.Extra as List
 import Maybe.Extra as Maybe
 
 
--- This module does calculations on moves
-
-
-type alias BoardMove =
-    Positioned3D { player : Player }
+-- This module does calculations on moves but does not dictate the game play itself
 
 
 type alias BoardIndex =
@@ -48,12 +51,27 @@ type Board a
     = Board
         { size : Int -- this determines the board will be nxn
         , cubic : Bool -- We can determiner the amount of boards
-        , moves : List BoardMove
+        , moves : List Move3D
         , enabled : Bool
         }
 
 
-moves : Board a -> List BoardMove
+encode : Board a -> Encode.Value
+encode (Board board) =
+    Encode.object
+        [ ( "size", Encode.int board.size )
+        , ( "cubic", Encode.bool board.cubic )
+        ]
+
+
+decode : Decoder { size : Int, cubic : Bool }
+decode =
+    Pipeline.decode (\s c -> { size = s, cubic = c } |> Debug.log "Board.decode")
+        |> required "size" Decode.int
+        |> required "cubic" Decode.bool
+
+
+moves : Board a -> List Move3D
 moves (Board board) =
     .moves board
 
@@ -61,6 +79,19 @@ moves (Board board) =
 size : Board a -> Int
 size (Board board) =
     .size board
+
+
+spots : Board a -> Int
+spots (Board board) =
+    if board.cubic then
+        board.size ^ 3
+    else
+        board.size ^ 2
+
+
+emptySpots : Board a -> Int
+emptySpots board =
+    spots board - List.length (moves board)
 
 
 locked : Board a -> Bool
@@ -156,12 +187,12 @@ play2D =
     play 0
 
 
-flatWin : Board Flat -> Maybe (List Move)
+flatWin : Board Flat -> Maybe (List Move3D)
 flatWin board =
     won board
 
 
-cubicWin : Board Cubic -> Maybe (List Move)
+cubicWin : Board Cubic -> Maybe (List Move3D)
 cubicWin board =
     won board
 
@@ -171,21 +202,56 @@ cubicWin board =
 -- Obtain a projection through a plane in cube
 
 
-verticalSlice : Board Cubic -> Int -> List Move
-verticalSlice (Board board) k =
+verticalColumnBoard : Board Cubic -> Int -> List Move
+verticalColumnBoard (Board board) k =
     board.moves
-        |> List.filter (\m -> m.board == k)
+        |> List.filter (\m -> m.column == k)
         |> List.map alongColumn
 
 
-horizontalSlice : Board a -> Int -> List Move
-horizontalSlice (Board board) k =
+verticalRowBoard : Board Cubic -> Int -> List Move
+verticalRowBoard (Board board) k =
     board.moves
-        |> List.filter (\m -> m.board == k)
+        |> List.filter (\m -> m.row == k)
         |> List.map alongRow
 
 
-alongColumn : BoardMove -> Move
+fromVerticalColumnBoard : Int -> List Move -> List Move3D
+fromVerticalColumnBoard k moves =
+    let
+        -- Undo operations of projecting along column
+        undoProjection m =
+            { player = m.player
+            , column = k
+            , row = m.column
+            , board = m.row
+            }
+    in
+    List.map undoProjection moves
+
+
+fromVerticalRowBoard : Int -> List Move -> List Move3D
+fromVerticalRowBoard k moves =
+    let
+        -- Undo operations of projecting along column
+        undoProjection m =
+            { player = m.player
+            , column = m.row
+            , row = k
+            , board = m.row
+            }
+    in
+    List.map undoProjection moves
+
+
+horizontalBoard : Board Cubic -> Int -> List Move
+horizontalBoard (Board board) k =
+    board.moves
+        |> List.filter (\m -> m.board == k)
+        |> List.map Move.as2D
+
+
+alongColumn : Move3D -> Move
 alongColumn pos =
     { player = pos.player
     , column = pos.row
@@ -193,41 +259,58 @@ alongColumn pos =
     }
 
 
-alongRow : BoardMove -> Move
+alongRow : Move3D -> Move
 alongRow pos =
     { player = pos.player
     , column = pos.column
-    , row = pos.row
+    , row = pos.board
     }
 
 
-won : Board a -> Maybe (List Move)
+won : Board a -> Maybe (List Move3D)
 won (Board board) =
     let
-        winOnHorizontalBoard : Maybe (List Move)
+        filterNonEmpty ls =
+            List.filter (\m -> m /= Nothing) ls
+                |> List.head
+                |> Maybe.join
+
+        winOnHorizontalBoard : Maybe (List Move3D)
         winOnHorizontalBoard =
             List.range 0 (board.size - 1)
                 |> List.map
-                    (horizontalSlice (Board board)
-                        >> didWin board.size
+                    (\boardIdx ->
+                        horizontalBoard (Board board) boardIdx
+                            |> didWin board.size
+                            |> Maybe.map (List.map (Move.fromMoveInBoard boardIdx))
                     )
-                |> List.filter (\m -> m /= Nothing)
-                |> List.head
-                |> Maybe.join
+                |> filterNonEmpty
 
-        winOnVerticalBoard : Maybe (List Move)
-        winOnVerticalBoard =
+        winOnVerticalColumnBoard : Maybe (List Move3D)
+        winOnVerticalColumnBoard =
             List.range 0 (board.size - 1)
                 |> List.map
-                    (verticalSlice (Board board)
-                        >> didWin board.size
+                    (\col ->
+                        verticalColumnBoard (Board board) col
+                            |> didWin board.size
+                            |> Maybe.map (fromVerticalColumnBoard col)
                     )
-                |> List.filter (\m -> m /= Nothing)
-                |> List.head
-                |> Maybe.join
+                |> filterNonEmpty
+
+        winOnVerticalRowBoard : Maybe (List Move3D)
+        winOnVerticalRowBoard =
+            List.range 0 (board.size - 1)
+                |> List.map
+                    (\col ->
+                        verticalRowBoard (Board board) col
+                            |> didWin board.size
+                            |> Maybe.map (fromVerticalRowBoard col)
+                    )
+                |> filterNonEmpty
 
         winOnCubic =
-            winOnVerticalBoard
+            winOnVerticalColumnBoard
+                |> Maybe.or winOnVerticalRowBoard
                 |> Maybe.or winOnHorizontalBoard
     in
     case board.cubic of
@@ -244,10 +327,22 @@ won (Board board) =
 
 checkpass : Int -> List Move -> Maybe (List Move)
 checkpass n moves =
+    let
+        sizeN mvs =
+            List.length mvs |> (\k -> k == n)
+
+        allFromSamePlayer mvs =
+            case List.head mvs of
+                Just m ->
+                    List.all (\mv -> mv.player == m.player) mvs
+
+                Nothing ->
+                    False
+    in
     Just moves
         |> Maybe.andThen
             (\mvs ->
-                if List.length mvs == n then
+                if sizeN mvs && allFromSamePlayer mvs then
                     Just mvs
                 else
                     Nothing
@@ -265,10 +360,21 @@ didWin n moves =
             List.filter (\mv -> mv.row == i) moves
                 |> checkpass n
 
-        diagonals =
+        diagonal1 =
             let
                 d1 =
                     List.range 0 (n - 1)
+                        |> List.map2 (\x y -> { column = x, row = y }) (List.range 0 (n - 1))
+            in
+            List.filter (\m -> List.member (Move.positioned m) d1) moves
+                |> checkpass n
+                |> List.singleton
+
+        diagonal2 =
+            let
+                d1 =
+                    List.range 0 (n - 1)
+                        |> List.reverse
                         |> List.map2 (\x y -> { column = x, row = y }) (List.range 0 (n - 1))
             in
             List.filter (\m -> List.member (Move.positioned m) d1) moves
@@ -285,7 +391,8 @@ didWin n moves =
     in
     verticals
         |> List.append horizontals
-        |> List.append diagonals
+        |> List.append diagonal1
+        |> List.append diagonal2
         |> List.filter (\r -> r /= Nothing)
         |> List.head
         |> Maybe.join
