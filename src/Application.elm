@@ -31,11 +31,6 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         -- Remote
-        NewGameSingle n ->
-            Return.singleton { model | player = Maybe.map Player.switch model.player, game = Game.flat n }
-                |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
-                |> Return.map (\m -> { m | turn = Player.PlayerX })
-
         NewGameMulti n ->
             Return.singleton { model | player = Maybe.map Player.switch model.player, game = Game.cubic n }
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
@@ -53,12 +48,6 @@ update msg model =
                 |> Return.map (\m -> { m | isReady = Utils.shouldStartGame m })
 
         -- Local
-        PlayAgainSingle n ->
-            Return.singleton { model | game = Game.flat n, player = Maybe.map Player.switch model.player }
-                |> Return.map (\m -> { m | turn = Player.PlayerX })
-                |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
-                |> Return.command (SocketIO.emit "rematch" <| Board.encode <| Board.flat n)
-
         PlayAgainMulti n ->
             Return.singleton { model | game = Game.cubic n, player = Maybe.map Player.switch model.player }
                 |> Return.map (\m -> { m | turn = Player.PlayerX })
@@ -112,13 +101,7 @@ subscriptions model =
 
                 "rematch" ->
                     Board.decode
-                        |> Decode.map
-                            (\config ->
-                                if config.cubic then
-                                    NewGameMulti config.size
-                                else
-                                    NewGameSingle config.size
-                            )
+                        |> Decode.map (NewGameMulti << .size)
 
                 _ ->
                     Decode.fail "No registered decoder"

@@ -2,7 +2,7 @@ module View exposing (view)
 
 --import Html.Attributes exposing (..)
 
-import Data.Game as Game exposing (Game, Mode(..), Status(..))
+import Data.Game as Game exposing (Game, Status(..))
 import Data.Player as Player exposing (Player)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -92,20 +92,11 @@ renderGame model =
 
 renderGameMode : Game -> Player -> Html Msg
 renderGameMode game nextPlayer =
-    case game.mode of
-        Simple board ->
-            Board.render2D
-                (\pos ->
-                    Play { column = pos.column, row = pos.row, player = nextPlayer } 0
-                )
-                board
-
-        Advanced board ->
-            Board.render3D
-                (\pos ->
-                    Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
-                )
-                board
+    Board.render3D
+        (\pos ->
+            Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
+        )
+        game.board
 
 
 playerPicker : Model -> Html Msg

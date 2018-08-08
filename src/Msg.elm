@@ -7,10 +7,8 @@ import Data.Player as Player exposing (Player)
 type Msg
     = Play Move Int -- Local player move
     | Opponent Move Int -- Remote player move
-    | NewGameSingle Int
     | NewGameMulti Int
     | SetPlayer Player
     | SetOponent Player
-    | PlayAgainSingle Int -- Player requests rematch
     | PlayAgainMulti Int
     | NoOp

@@ -1,11 +1,9 @@
 module Data.Game
     exposing
         ( Game
-        , Mode(..)
         , Status(..)
         , cubic
         , enable
-        , flat
         , lock
         , status
         , unlock
@@ -21,11 +19,6 @@ import Data.Player as Player exposing (Player)
 import Maybe.Extra as Maybe
 
 
-type Mode
-    = Simple (Board Flat)
-    | Advanced (Board Cubic)
-
-
 type Status
     = Winner Player (List (Positioned3D {}))
     | Tie
@@ -33,21 +26,14 @@ type Status
 
 
 type alias Game =
-    { mode : Mode
+    { board : Board Cubic
     , win : Maybe (List Move3D)
     }
 
 
 cubic : Int -> Game
 cubic n =
-    { mode = Advanced <| Board.lock <| Board.cubic n
-    , win = Nothing
-    }
-
-
-flat : Int -> Game
-flat n =
-    { mode = Simple <| Board.lock <| Board.flat n
+    { board = Board.lock <| Board.cubic n
     , win = Nothing
     }
 
@@ -56,12 +42,7 @@ status : Game -> Status
 status game =
     let
         fullBoard =
-            case game.mode of
-                Simple board ->
-                    Board.emptySpots board == 0
-
-                Advanced board ->
-                    Board.emptySpots board == 0
+            Board.emptySpots game.board == 0
 
         player =
             Maybe.map List.head game.win
@@ -85,52 +66,25 @@ status game =
 
 update : Move -> Int -> Game -> Game
 update move idx game =
-    case game.mode of
-        Simple board ->
-            Board.play2D move board
-                |> (\mode -> { game | mode = Simple mode })
-                |> updateWin
-
-        Advanced board ->
-            Board.play3D idx move board
-                |> (\mode -> { game | mode = Advanced mode })
-                |> updateWin
+    Board.play3D idx move game.board
+        |> (\board -> { game | board = board })
+        |> updateWin
 
 
 updateWin : Game -> Game
 updateWin game =
-    case game.mode of
-        Simple board ->
-            Board.flatWin board
-                |> (\win -> { game | mode = Simple board, win = win })
-
-        Advanced board ->
-            Board.cubicWin board
-                |> (\win -> { game | mode = Advanced board, win = win })
+    Board.cubicWin game.board
+        |> (\win -> { game | win = win })
 
 
 lock : Game -> Game
 lock game =
-    case game.mode of
-        Simple board ->
-            Board.lock board
-                |> (\mode -> { game | mode = Simple mode })
-
-        Advanced board ->
-            Board.lock board
-                |> (\mode -> { game | mode = Advanced mode })
+    { game | board = Board.lock game.board }
 
 
 unlock : Game -> Game
 unlock game =
-    case game.mode of
-        Simple board ->
-            Board.unlock board
-                |> (\mode -> { game | mode = Simple mode })
-
-        Advanced board ->
-            Board.unlock board
-                |> (\mode -> { game | mode = Advanced mode })
+    { game | board = Board.unlock game.board }
 
 
 enable : Bool -> Game -> Game
