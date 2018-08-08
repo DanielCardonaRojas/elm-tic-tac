@@ -4,6 +4,7 @@ module Data.Board
         , BoardIndex
         , Cubic
         , Flat
+        , cubeDiagonals
         , cubic
         , cubicWin
         , decode
@@ -45,6 +46,14 @@ type Flat
 
 type Cubic
     = Cubic
+
+
+type alias Spot =
+    Positioned3D {}
+
+
+type alias Spots =
+    List Spot
 
 
 type Board a
@@ -198,7 +207,7 @@ cubicWin board =
 
 
 
--- Helpers
+-- Internal
 -- Obtain a projection through a plane in cube
 
 
@@ -308,14 +317,32 @@ won (Board board) =
                     )
                 |> filterNonEmpty
 
-        winOnCubic =
-            winOnVerticalColumnBoard
-                |> Maybe.or winOnVerticalRowBoard
-                |> Maybe.or winOnHorizontalBoard
+        diagonals =
+            cubeDiagonals board.size
+
+        onDiagonal : Spots -> Maybe (List Move3D)
+        onDiagonal d =
+            board.moves
+                |> List.filterMap
+                    (\m ->
+                        if List.member (Move.positioned3D m) d then
+                            Just m
+                        else
+                            Nothing
+                    )
+                |> Just
+                |> Maybe.filter (\mvs -> List.length mvs == board.size)
+                |> Maybe.filter (\mvs -> samePlayer mvs)
     in
     case board.cubic of
         True ->
-            winOnCubic
+            winOnVerticalColumnBoard
+                |> Maybe.or winOnVerticalRowBoard
+                |> Maybe.or winOnHorizontalBoard
+                |> Maybe.or (onDiagonal <| diagonals.d1)
+                |> Maybe.or (onDiagonal <| diagonals.d2)
+                |> Maybe.or (onDiagonal <| diagonals.d3)
+                |> Maybe.or (onDiagonal <| diagonals.d4)
 
         False ->
             Nothing
@@ -325,28 +352,18 @@ won (Board board) =
 -- | Determine if there is a sequence of winning moves
 
 
+samePlayer : List { r | player : Player } -> Bool
+samePlayer mvs =
+    List.groupWhile (\m1 m2 -> m1.player == m2.player) mvs
+        |> List.length
+        |> (\l -> l == 1)
+
+
 checkpass : Int -> List Move -> Maybe (List Move)
 checkpass n moves =
-    let
-        sizeN mvs =
-            List.length mvs |> (\k -> k == n)
-
-        allFromSamePlayer mvs =
-            case List.head mvs of
-                Just m ->
-                    List.all (\mv -> mv.player == m.player) mvs
-
-                Nothing ->
-                    False
-    in
     Just moves
-        |> Maybe.andThen
-            (\mvs ->
-                if sizeN mvs && allFromSamePlayer mvs then
-                    Just mvs
-                else
-                    Nothing
-            )
+        |> Maybe.filter (\mvs -> List.length mvs == n)
+        |> Maybe.filter (\mvs -> samePlayer mvs)
 
 
 didWin : Int -> List Move -> Maybe (List Move)
@@ -396,3 +413,32 @@ didWin n moves =
         |> List.filter (\r -> r /= Nothing)
         |> List.head
         |> Maybe.join
+
+
+cubeDiagonals : Int -> { d1 : Spots, d2 : Spots, d3 : Spots, d4 : Spots }
+cubeDiagonals n =
+    let
+        increasingIdx =
+            List.range 0 (n - 1)
+
+        decreasingIdx =
+            List.reverse increasingIdx
+
+        gen l1 l2 =
+            -- Z is always increasing on cube diagonals
+            List.map3 (\x y z -> ( x, y, z )) l1 l2 increasingIdx
+                |> List.map (\( x, y, z ) -> { column = x, row = y, board = z })
+
+        d1 =
+            gen increasingIdx increasingIdx
+
+        d2 =
+            gen decreasingIdx decreasingIdx
+
+        d3 =
+            gen increasingIdx decreasingIdx
+
+        d4 =
+            gen decreasingIdx increasingIdx
+    in
+    { d1 = d1, d2 = d2, d3 = d3, d4 = d4 }
