@@ -4,11 +4,13 @@ module Data.Board
         , BoardIndex
         , Cubic
         , Flat
+        , Spot
         , cubeDiagonals
         , cubic
         , cubicWin
         , decode
         , emptySpots
+        , enabled
         , encode
         , flat
         , flatWin
@@ -173,6 +175,11 @@ lock (Board board) =
 unlock : Board a -> Board a
 unlock (Board board) =
     Board { board | enabled = True }
+
+
+enabled : Bool -> Board a -> Board a
+enabled bool (Board board) =
+    Board { board | enabled = bool }
 
 
 toggleLock : Board a -> Board a
