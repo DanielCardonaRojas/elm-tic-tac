@@ -31,6 +31,7 @@ npm run start
 # Build and run docker image
 
 ```shell
+npm run build
 docker build -t decaroj/elm-tic-tac .
 docker run -d --name elm-tic-tac -p 8000:8000 decaroj/elm-tic-tac
 ```

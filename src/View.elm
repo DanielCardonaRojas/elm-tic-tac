@@ -11,24 +11,29 @@ import Model exposing (..)
 import Msg exposing (Msg(..))
 import View.Game as Game
 
+
 view : Model -> Html Msg
 view model =
-    case model.scene of 
+    case model.scene of
         MatchSetup str ->
             gameSetup (model.room == Nothing) str
-            |> template
+                |> template
+
         Rematch ->
             rematch model
-            |> template
+                |> template
+
         GamePlay ->
             model.player
-            |> Maybe.map (Game.render model.game) 
-            |> Maybe.withDefault (text "No player in game")
-            |> template
+                |> Maybe.map (Game.render model.game)
+                |> Maybe.withDefault (text "No player in game")
+                |> template
+
         PlayerChoose ->
             playerPicker model
-            |> template
-        
+                |> template
+
+
 template : Html Msg -> Html Msg
 template html =
     div [ class "elm-tic-tac" ]
@@ -36,6 +41,7 @@ template html =
         , html
         , footer
         ]
+
 
 turnIndicator : Model -> Html Msg
 turnIndicator model =
@@ -58,25 +64,33 @@ footer : Html msg
 footer =
     div [ class "footer" ]
         [ span []
-            [ text "The code for this game is open sourced and written in Elm" ]
+            [ text "The "
+            , a [ href "https://github.com/DanielCardonaRojas/elm-tic-tac", target "_blank" ] [ text "code" ]
+            , text " for this game is open sourced and written in Elm"
+            ]
         , span
             []
             [ text "© 2018 Daniel Cardona Rojas" ]
         ]
 
+
+
 -- Scenes
-gameSetup : Bool -> String  -> Html Msg
+
+
+gameSetup : Bool -> String -> Html Msg
 gameSetup enabled room =
-    div [class "setup"]
-    [ h3 [] [text "Create a new match or join one"]
-    , input [ onInput (String.trim >> String.toLower >> RoomSetup), placeholder "Enter room name", disabled <| not enabled ] []
-    , button [onClick <| CreateGame room, disabled <| not enabled ] [text "Create Game"]
-    , button [onClick <| SelectRoom room, disabled <| not enabled ] [text "Join"]
-    ]
+    div [ class "setup" ]
+        [ h3 [] [ text "Create a new match or join one" ]
+        , input [ onInput (String.trim >> String.toLower >> RoomSetup), placeholder "Enter room name", disabled <| not enabled ] []
+        , button [ onClick <| CreateGame room, disabled <| not enabled ] [ text "Create Game" ]
+        , button [ onClick <| SelectRoom room, disabled <| not enabled ] [ text "Join" ]
+        ]
+
 
 rematch : Model -> Html Msg
 rematch model =
-    div [class "rematch"] [text "Rematch"]
+    div [ class "rematch" ] [ text "Rematch" ]
 
 
 playerPicker : Model -> Html Msg

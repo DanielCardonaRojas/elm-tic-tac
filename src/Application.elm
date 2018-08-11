@@ -14,8 +14,8 @@ import Msg exposing (Msg(..))
 import Ports.Echo as Echo
 import Ports.LocalStorage as LocalStorage
 import Ports.SocketIO as SocketIO
-import Return 
 import Respond exposing (Respond)
+import Return
 import View
 
 
@@ -54,16 +54,15 @@ update msg model =
         -- Local
         -- MatchSetup msgs
         SelectRoom name ->
-            Return.singleton  { model | room = Just name, scene = PlayerChoose }
-            |> Return.command (SocketIO.emit "joinGame" <| Encode.string name)
+            Return.singleton { model | room = Just name, scene = PlayerChoose }
+                |> Return.command (SocketIO.emit "joinGame" <| Encode.string name)
 
         CreateGame str ->
             Return.singleton model
                 |> Return.command (SocketIO.emit "createGame" <| Encode.string str)
 
         RoomSetup str ->
-            Return.singleton {model | scene = MatchSetup str}
-        
+            Return.singleton { model | scene = MatchSetup str }
 
         PlayAgainMulti n ->
             Return.singleton { model | game = Game.make n, player = Maybe.map Player.switch model.player }
@@ -87,10 +86,9 @@ update msg model =
 
         SetupReady ->
             Return.singleton { model | scene = PlayerChoose }
-        
+
         SocketID str ->
             Return.singleton { model | socketId = Just str }
-
 
         NoOp ->
             model ! []
@@ -99,8 +97,8 @@ update msg model =
 init : ( Model, Cmd Msg )
 init =
     Return.singleton Model.default
-        |> Return.command (SocketIO.connect "http://localhost:8000")
-        --|> Return.command (SocketIO.connect "")
+        --|> Return.command (SocketIO.connect "http://localhost:8000")
+        |> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "joinedGame")
         |> Return.command (SocketIO.listen "socketid")
@@ -124,13 +122,14 @@ subscriptions model =
 
                 "joinedGame" ->
                     Decode.string
-                        |> Decode.map (
-                            Debug.log "joinedGame socket"
-                            >> always SetupReady
-                        )
+                        |> Decode.map
+                            (Debug.log "joinedGame socket"
+                                >> always SetupReady
+                            )
+
                 "chosePlayer" ->
                     Player.decode
-                    |> Decode.map SetOponent
+                        |> Decode.map SetOponent
 
                 "rematch" ->
                     Board.decode
@@ -152,7 +151,10 @@ subscriptions model =
         ]
 
 
+
 -- Helpers
+
+
 isCurrentPlayerTurn : Model -> Bool
 isCurrentPlayerTurn model =
     Maybe.map (\p -> p == model.turn) model.player
@@ -160,10 +162,8 @@ isCurrentPlayerTurn model =
 
 
 emitInRoom : String -> Value -> Respond Msg Model
-emitInRoom event value = 
+emitInRoom event value =
     \model ->
         model.room
-        |> Maybe.map (\r -> SocketIO.emit event (Room.encode r value))
-        |> Maybe.withDefault Cmd.none
-
-
+            |> Maybe.map (\r -> SocketIO.emit event (Room.encode r value))
+            |> Maybe.withDefault Cmd.none
