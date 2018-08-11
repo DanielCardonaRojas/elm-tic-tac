@@ -2,10 +2,9 @@ module Data.Game
     exposing
         ( Game
         , Status(..)
-        , cubic
+        , make
         , enable
         , lock
-        , status
         , unlock
         , update
         )
@@ -28,31 +27,33 @@ type Status
 type alias Game =
     { board : Board Cubic
     , win : Maybe ( Player, List Spot )
+    , status : Status
     }
 
 
-cubic : Int -> Game
-cubic n =
+make : Int -> Game
+make n =
     { board = Board.lock <| Board.cubic n
     , win = Nothing
+    , status = Playing
     }
 
 
-status : Game -> Status
-status game =
+updateStatus : Game -> Game
+updateStatus game =
     let
         fullBoard =
             Board.emptySpots game.board == 0
     in
     case ( game.win, fullBoard ) of
         ( Just ( p, moves ), _ ) ->
-            Winner p moves
+            { game | status = Winner p moves }
 
         ( _, True ) ->
-            Tie
+            { game | status = Tie }
 
         ( _, _ ) ->
-            Playing
+            { game | status = Playing }
 
 
 update : Move -> Int -> Game -> Game
@@ -60,6 +61,7 @@ update move idx game =
     Board.play3D idx move game.board
         |> (\board -> { game | board = board })
         |> updateWin
+        |> updateStatus
 
 
 updateWin : Game -> Game
