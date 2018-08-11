@@ -11,6 +11,8 @@ import Json.Encode as Encode
 port connect : String -> Cmd msg
 
 
+{-| Register to a particular event
+-}
 port listen : String -> Cmd msg
 
 

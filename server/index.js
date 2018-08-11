@@ -14,21 +14,44 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function (socket) {
-    console.log('new connection');
-    socket.on('move', function(data){
-        console.log("emiting move");
-        console.log(data);
-        socket.broadcast.emit('move', data);
+    console.log('new connection socket id: ' + socket.id);
+    //socket.broadcast.emit('new_player', socket.id);
+    socket.emit('socketid', socket.id);
+
+    socket.on('move', function(payload){
+        console.log('move');
+        console.log(payload);
+        const data = payload.data;
+        const room = payload.room;
+        socket.broadcast.to(room).emit('move', data);
     });
 
-    socket.on('join', function(data){
-        console.log("emiting join");
+    socket.on('createGame',function(data){
+        console.log('createGame');
         console.log(data);
-        socket.broadcast.emit('join', data);
+        var roomName = 'hardcodedRoom';
+        socket.join(roomName);
+        socket.emit('newGame', roomName);
+    });
+
+    socket.on('joinGame', function(data){
+        console.log('joinGame');
+        console.log(data);
+        const room = data;
+        socket.join(room);
+        socket.broadcast.to(room).emit('joinedGame', socket.id);
+    });
+
+    socket.on('chosePlayer', function(payload){
+        console.log('chosePlayer');
+        console.log(payload);
+        const data = payload.data;
+        const room = payload.room;
+        socket.broadcast.to(room).emit('chosePlayer', data);
     });
 
     socket.on('rematch', function(data){
-        console.log("emiting rematch");
+        console.log('rematch');
         console.log(data);
         socket.broadcast.emit('rematch', data);
     });

@@ -4,15 +4,18 @@ import Data.Board as Board exposing (Board, Cubic, Flat)
 import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
+import Data.Room as Room
 import Html
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode exposing (Value)
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
 import Ports.Echo as Echo
 import Ports.LocalStorage as LocalStorage
 import Ports.SocketIO as SocketIO
-import Return
+import Return 
+import Respond exposing (Respond)
 import Utils
 import View
 
@@ -32,7 +35,7 @@ update msg model =
     case msg of
         -- Remote
         NewGameMulti n ->
-            Return.singleton { model | player = Maybe.map Player.switch model.player, game = Game.cubic n }
+            Return.singleton { model | player = Maybe.map Player.switch model.player, game = Game.make n }
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
                 |> Return.map (\m -> { m | turn = Player.PlayerX })
                 |> Debug.log "NewGameMulti"
@@ -45,14 +48,20 @@ update msg model =
 
         SetOponent p ->
             Return.singleton { model | opponent = Just p }
-                |> Return.map (\m -> { m | isReady = Utils.shouldStartGame m })
+
+        SetRoom name ->
+            Return.singleton { model | room = Just name }
 
         -- Local
+        SelectRoom name ->
+            Return.singleton  { model | room = Just name, scene = PlayerChoose }
+            |> Return.command (SocketIO.emit "joinGame" <| Encode.string name)
+
         PlayAgainMulti n ->
-            Return.singleton { model | game = Game.cubic n, player = Maybe.map Player.switch model.player }
+            Return.singleton { model | game = Game.make n, player = Maybe.map Player.switch model.player }
                 |> Return.map (\m -> { m | turn = Player.PlayerX })
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
-                |> Return.command (SocketIO.emit "rematch" <| Board.encode <| Board.cubic n)
+                |> Return.effect_ (emitInRoom "rematch" <| Board.encode <| Board.cubic n)
 
         Play move idx ->
             -- TODO: Emit movement including board index
@@ -60,13 +69,23 @@ update msg model =
                 |> Return.map (Game.update move idx)
                 |> Return.map Game.lock
                 |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
-                |> Return.command (SocketIO.emit "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
+                |> Return.effect_ (emitInRoom "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
 
         SetPlayer p ->
             Return.singleton { model | player = Just p }
-                |> Return.map (\m -> { m | isReady = Utils.shouldStartGame m })
+                |> Return.map (\m -> { m | scene = GamePlay })
                 |> Return.map (\m -> { m | game = Game.enable (p == model.turn) m.game })
-                |> Return.command (SocketIO.emit "join" <| Player.encode p)
+                |> Return.effect_ (emitInRoom "chosePlayer" <| Player.encode p)
+
+        SocketID str ->
+            Return.singleton { model | socketId = Just str }
+
+        CreateGame str ->
+            Return.singleton model
+                |> Return.command (SocketIO.emit "createGame" <| Encode.string str)
+        
+        SetupReady ->
+            Return.singleton { model | scene = PlayerChoose}
 
         NoOp ->
             model ! []
@@ -75,11 +94,14 @@ update msg model =
 init : ( Model, Cmd Msg )
 init =
     Return.singleton Model.default
-        --|> Return.command (SocketIO.connect "http://localhost:8000")
-        |> Return.command (SocketIO.connect "")
+        |> Return.command (SocketIO.connect "http://localhost:8000")
+        --|> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
-        |> Return.command (SocketIO.listen "join")
+        |> Return.command (SocketIO.listen "joinedGame")
+        |> Return.command (SocketIO.listen "socketid")
         |> Return.command (SocketIO.listen "rematch")
+        |> Return.command (SocketIO.listen "newGame")
+        |> Return.command (SocketIO.listen "chosePlayer")
 
 
 subscriptions : Model -> Sub Msg
@@ -95,13 +117,27 @@ subscriptions model =
                                     |> Debug.log "socket.io move"
                             )
 
-                "join" ->
+                "joinedGame" ->
+                    Decode.string
+                        |> Decode.map (
+                            Debug.log "joinedGame socket"
+                            >> always SetupReady
+                        )
+                "chosePlayer" ->
                     Player.decode
-                        |> Decode.map SetOponent
+                    |> Decode.map SetOponent
 
                 "rematch" ->
                     Board.decode
                         |> Decode.map (NewGameMulti << .size)
+
+                "socketid" ->
+                    Decode.string
+                        |> Decode.map SocketID
+
+                "newGame" ->
+                    Decode.string
+                        |> Decode.map SetRoom
 
                 _ ->
                     Decode.fail "No registered decoder"
@@ -111,7 +147,18 @@ subscriptions model =
         ]
 
 
+-- Helpers
 isCurrentPlayerTurn : Model -> Bool
 isCurrentPlayerTurn model =
     Maybe.map (\p -> p == model.turn) model.player
         |> Maybe.withDefault False
+
+
+emitInRoom : String -> Value -> Respond Msg Model
+emitInRoom event value = 
+    \model ->
+        model.room
+        |> Maybe.map (\r -> SocketIO.emit event (Room.encode r value))
+        |> Maybe.withDefault Cmd.none
+
+
