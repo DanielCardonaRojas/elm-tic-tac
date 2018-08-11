@@ -29,7 +29,7 @@ io.on('connection', function (socket) {
     socket.on('createGame',function(data){
         console.log('createGame');
         console.log(data);
-        var roomName = 'hardcodedRoom';
+        var roomName = data;
         socket.join(roomName);
         socket.emit('newGame', roomName);
     });

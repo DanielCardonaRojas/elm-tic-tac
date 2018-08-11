@@ -34,7 +34,7 @@ body {
     margin-top: 1rem;
 }
 
-.picker {
+.picker, .setup {
     display: flex;
     flex-direction: column;
     background-color: #c7c7c7;
@@ -43,12 +43,24 @@ body {
     border-radius: 6px;
 }
 
-.picker button {
+input {
+    font-family: monospace;
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.picker button, .setup button {
     margin: 5px 0;
     padding: 7px;
     font-family: monospace;
     font-weight: 800;
     font-size: 1rem;
+}
+
+.setup button {
+    background-color: #3fff7f;
+    border: none;
+    color: lightslategrey;
 }
 
 .picker button.is-active {

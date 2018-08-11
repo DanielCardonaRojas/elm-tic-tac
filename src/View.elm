@@ -5,19 +5,17 @@ module View exposing (view)
 import Data.Player as Player exposing (Player)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
-import Utils
-import View.Board as Board
 import View.Game as Game
 
 view : Model -> Html Msg
 view model =
     case model.scene of 
-        MatchSetup ->
-            gameSetup model
+        MatchSetup str ->
+            gameSetup (model.room == Nothing) str
             |> template
         Rematch ->
             rematch model
@@ -67,11 +65,13 @@ footer =
         ]
 
 -- Scenes
-gameSetup : Model -> Html Msg
-gameSetup model =
+gameSetup : Bool -> String  -> Html Msg
+gameSetup enabled room =
     div [class "setup"]
-    [ button [onClick <| SelectRoom "hardcodedRoom"] [text "Join"]
-    , button [onClick <| CreateGame "hardcodedRoom"] [text "Create Game"]
+    [ h3 [] [text "Create a new match or join one"]
+    , input [ onInput (String.trim >> String.toLower >> RoomSetup), placeholder "Enter room name", disabled <| not enabled ] []
+    , button [onClick <| CreateGame room, disabled <| not enabled ] [text "Create Game"]
+    , button [onClick <| SelectRoom room, disabled <| not enabled ] [text "Join"]
     ]
 
 rematch : Model -> Html Msg

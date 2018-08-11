@@ -16,7 +16,6 @@ import Ports.LocalStorage as LocalStorage
 import Ports.SocketIO as SocketIO
 import Return 
 import Respond exposing (Respond)
-import Utils
 import View
 
 
@@ -53,9 +52,18 @@ update msg model =
             Return.singleton { model | room = Just name }
 
         -- Local
+        -- MatchSetup msgs
         SelectRoom name ->
             Return.singleton  { model | room = Just name, scene = PlayerChoose }
             |> Return.command (SocketIO.emit "joinGame" <| Encode.string name)
+
+        CreateGame str ->
+            Return.singleton model
+                |> Return.command (SocketIO.emit "createGame" <| Encode.string str)
+
+        RoomSetup str ->
+            Return.singleton {model | scene = MatchSetup str}
+        
 
         PlayAgainMulti n ->
             Return.singleton { model | game = Game.make n, player = Maybe.map Player.switch model.player }
@@ -66,26 +74,23 @@ update msg model =
         Play move idx ->
             -- TODO: Emit movement including board index
             Return.singleton model.game
-                |> Return.map (Game.update move idx)
-                |> Return.map Game.lock
+                |> Return.map (Game.update move idx >> Game.lock)
                 |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
                 |> Return.effect_ (emitInRoom "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
 
+        -- PlayerChoose msgs
         SetPlayer p ->
             Return.singleton { model | player = Just p }
                 |> Return.map (\m -> { m | scene = GamePlay })
                 |> Return.map (\m -> { m | game = Game.enable (p == model.turn) m.game })
                 |> Return.effect_ (emitInRoom "chosePlayer" <| Player.encode p)
 
+        SetupReady ->
+            Return.singleton { model | scene = PlayerChoose }
+        
         SocketID str ->
             Return.singleton { model | socketId = Just str }
 
-        CreateGame str ->
-            Return.singleton model
-                |> Return.command (SocketIO.emit "createGame" <| Encode.string str)
-        
-        SetupReady ->
-            Return.singleton { model | scene = PlayerChoose}
 
         NoOp ->
             model ! []

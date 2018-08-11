@@ -5,7 +5,7 @@ import Data.Player as Player exposing (Player)
 
 
 type Scene
-    = MatchSetup
+    = MatchSetup String
     | PlayerChoose
     | GamePlay
     | Rematch
@@ -30,5 +30,5 @@ default =
     , opponent = Nothing
     , socketId = Nothing
     , room = Nothing
-    , scene = MatchSetup
+    , scene = MatchSetup ""
     }

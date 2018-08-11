@@ -11,6 +11,7 @@ type Msg
     | SetRoom String -- Set by the socket.io server after creating game
     | SelectRoom String -- Set by player to join room
     | CreateGame String -- Create socket.io room on server
+    | RoomSetup String -- Input when user types
     | NewGameMulti Int
     | SetPlayer Player
     | SetOponent Player
