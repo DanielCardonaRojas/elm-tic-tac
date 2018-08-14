@@ -39,13 +39,13 @@ view model =
 
 leftPortion : Model -> Html Msg
 leftPortion model =
-    [ Maybe.map (\p -> playerScore (Tuple.first model.score) (model.turn /= p) p) model.player ]
+    [ Maybe.map (\p -> playerScore (Tuple.first model.score) (model.turn /= p) "You" p) model.player ]
         |> unwrapping (div [ class "left" ])
 
 
 rightPortion : Model -> Html Msg
 rightPortion model =
-    [ Maybe.map (\p -> playerScore (Tuple.second model.score) (model.turn /= p) p) model.opponent ]
+    [ Maybe.map (\p -> playerScore (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent ]
         |> unwrapping (div [ class "right" ])
 
 
@@ -160,8 +160,8 @@ playerPicker model =
         ]
 
 
-playerScore : Int -> Bool -> Player -> Html msg
-playerScore score disabled player =
+playerScore : Int -> Bool -> String -> Player -> Html msg
+playerScore score disabled title player =
     div
         (class "score"
             :: playerClass player
@@ -171,7 +171,7 @@ playerScore score disabled player =
                     []
                )
         )
-        [ span [] [ text <| toString score ]
+        [ span [] [ text <| title ++ ": " ++ toString score ]
         ]
 
 
