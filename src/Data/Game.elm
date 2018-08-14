@@ -2,9 +2,9 @@ module Data.Game
     exposing
         ( Game
         , Status(..)
-        , make
         , enable
         , lock
+        , make
         , unlock
         , update
         )
@@ -39,6 +39,33 @@ make n =
     }
 
 
+update : Move -> Int -> Game -> Game
+update move idx game =
+    Board.play3D idx move game.board
+        |> (\board -> { game | board = board })
+        |> updateWin
+        |> updateStatus
+
+
+lock : Game -> Game
+lock game =
+    { game | board = Board.lock game.board }
+
+
+unlock : Game -> Game
+unlock game =
+    { game | board = Board.unlock game.board }
+
+
+enable : Bool -> Game -> Game
+enable bool game =
+    { game | board = Board.enabled bool game.board }
+
+
+
+-- Internal
+
+
 updateStatus : Game -> Game
 updateStatus game =
     let
@@ -54,14 +81,6 @@ updateStatus game =
 
         ( _, _ ) ->
             { game | status = Playing }
-
-
-update : Move -> Int -> Game -> Game
-update move idx game =
-    Board.play3D idx move game.board
-        |> (\board -> { game | board = board })
-        |> updateWin
-        |> updateStatus
 
 
 updateWin : Game -> Game
@@ -84,18 +103,3 @@ winning moves =
     Just (,)
         |> Maybe.andMap player
         |> Maybe.andMap spots
-
-
-lock : Game -> Game
-lock game =
-    { game | board = Board.lock game.board }
-
-
-unlock : Game -> Game
-unlock game =
-    { game | board = Board.unlock game.board }
-
-
-enable : Bool -> Game -> Game
-enable bool game =
-    { game | board = Board.enabled bool game.board }

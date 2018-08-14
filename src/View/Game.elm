@@ -2,23 +2,21 @@ module View.Game exposing (render)
 
 import Data.Game as Game exposing (Game, Status(..))
 import Data.Player as Player exposing (Player)
-import View.Board as Board
-import Msg exposing (Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Msg exposing (Msg(..))
+import View.Board as Board
+
 
 render : Game -> Player -> Html Msg
 render game player =
     let
         winTitle winner =
-                (\p ->
-                    if p == winner then
-                        h2 [] [ text "You win" ]
-                    else
-                        h2 [] [ text "You loose" ]
-                )
-                player
+            if player == winner then
+                h2 [] [ text "You win" ]
+            else
+                h2 [] [ text "You loose" ]
 
         lockedBoard =
             renderBoard (Game.lock game) player

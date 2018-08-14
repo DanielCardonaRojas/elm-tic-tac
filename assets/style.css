@@ -25,7 +25,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    text-align: center;
+    align-items: center;
 }
 
 .gametitle {
@@ -117,3 +117,16 @@ input {
     align-items: center;
     justify-content: center;
 }
+
+.game, .score {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.main {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+} 

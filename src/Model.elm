@@ -18,6 +18,7 @@ type alias Model =
     , opponent : Maybe Player
     , socketId : Maybe String
     , room : Maybe String
+    , score : ( Int, Int ) -- Player and opponent score
     , scene : Scene
     }
 
@@ -30,5 +31,6 @@ default =
     , opponent = Nothing
     , socketId = Nothing
     , room = Nothing
+    , score = ( 0, 0 )
     , scene = MatchSetup ""
     }

@@ -24,40 +24,49 @@ view model =
                 |> template
 
         GamePlay ->
-            model.player
-                |> Maybe.map (Game.render model.game)
-                |> Maybe.withDefault (text "No player in game")
-                |> template
+            [ Maybe.map (playerScore <| Tuple.first model.score) model.player
+            , Maybe.map (Game.render model.game) model.player
+            , Maybe.map (playerScore <| Tuple.second model.score) model.opponent
+            ]
+                |> unwrapping template_
 
         PlayerChoose ->
             playerPicker model
                 |> template
 
 
-template : Html Msg -> Html Msg
-template html =
+leftPortion : Model -> Html Msg
+leftPortion model =
+    div [ class "left" ] []
+
+
+rightPortion : Model -> Html Msg
+rightPortion model =
+    div [ class "right" ] []
+
+
+template_ : List (Html Msg) -> Html Msg
+template_ html =
     div [ class "elm-tic-tac" ]
         [ span [ class "gametitle" ] [ text "Elm-Tic-Tac" ]
-        , html
+        , div [ class "main" ] html
         , footer
         ]
 
 
-turnIndicator : Model -> Html Msg
-turnIndicator model =
-    let
-        turnMessage player turn =
-            if player == turn then
-                span [ class "active" ]
-                    [ text "Your turn" ]
-            else
-                span [ class "inactive" ]
-                    [ text "Waiting for opponent move" ]
-    in
-    Just turnMessage
-        |> Maybe.andMap model.player
-        |> Maybe.andMap (Just model.turn)
-        |> Maybe.withDefault (text "Board blocked")
+template : Html Msg -> Html Msg
+template html =
+    template_ <| List.singleton html
+
+
+turnIndicator : Player -> Player -> Html Msg
+turnIndicator player turn =
+    if player == turn then
+        span [ class "active" ]
+            [ text "Your turn" ]
+    else
+        span [ class "inactive" ]
+            [ text "Waiting for opponent move" ]
 
 
 footer : Html msg
@@ -93,6 +102,35 @@ rematch model =
     div [ class "rematch" ] [ text "Rematch" ]
 
 
+playerClass : Player -> Attribute msg
+playerClass p =
+    toString p |> String.toLower |> class
+
+
+playerPicker_ : Player -> Player -> Html Msg
+playerPicker_ player opponent =
+    let
+        activeAttr p =
+            if p == player then
+                [ class "is-active" ]
+            else
+                []
+
+        enabledFor p =
+            p /= player
+
+        segment player =
+            button
+                (playerClass player :: (onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
+                [ text <| toString player ]
+    in
+    div [ class "picker" ]
+        [ span [] [ text "Choose a player" ]
+        , segment Player.PlayerX
+        , segment Player.PlayerO
+        ]
+
+
 playerPicker : Model -> Html Msg
 playerPicker model =
     let
@@ -101,14 +139,6 @@ playerPicker model =
                 [ class "is-active" ]
             else
                 []
-
-        playerClass p =
-            case p of
-                Player.PlayerX ->
-                    class "playerx"
-
-                Player.PlayerO ->
-                    class "playero"
 
         enabledFor player =
             Maybe.map (\p -> p /= player) model.opponent
@@ -124,3 +154,31 @@ playerPicker model =
         , segment Player.PlayerX
         , segment Player.PlayerO
         ]
+
+
+playerScore : Int -> Player -> Html msg
+playerScore score player =
+    div [ class "score" ]
+        [ span [ playerClass player ] [ text <| toString score ]
+        ]
+
+
+unwrapping : (List (Html msg) -> Html msg) -> List (Maybe (Html msg)) -> Html msg
+unwrapping wrapper ls =
+    List.filterMap identity ls
+        |> wrapper
+
+
+unwrapped : String -> List (Maybe (Html msg)) -> Html msg
+unwrapped divClass ls =
+    unwrapping (div [ class divClass ]) ls
+
+
+withWrapper : String -> Maybe (Html msg) -> Html msg
+withWrapper divClass html =
+    let
+        wrapper =
+            div [ class divClass ]
+    in
+    Maybe.map (wrapper << List.singleton) html
+        |> Maybe.withDefault (wrapper [])
