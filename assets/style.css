@@ -118,9 +118,28 @@ input {
     justify-content: center;
 }
 
-.game, .score {
+.left, .right, .center {
     flex-grow: 1;
     text-align: center;
+    height: 100%;
+}
+
+.score {
+    padding: 1rem;
+    margin: 0 1rem;
+    background-color: #c7c7c7;
+}
+
+.score.playerx {
+    background-color: #ff8585;
+}
+
+.score.playero {
+    background-color: #7fffd3;
+}
+
+.score.disabled {
+    opacity: 0.2;
 }
 
 .main {

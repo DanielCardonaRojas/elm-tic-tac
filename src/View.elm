@@ -24,11 +24,13 @@ view model =
                 |> template
 
         GamePlay ->
-            [ Maybe.map (playerScore <| Tuple.first model.score) model.player
+            [ leftPortion model
             , Maybe.map (Game.render model.game) model.player
-            , Maybe.map (playerScore <| Tuple.second model.score) model.opponent
+                |> List.singleton
+                |> unwrapping (div [ class "center" ])
+            , rightPortion model
             ]
-                |> unwrapping template_
+                |> template_
 
         PlayerChoose ->
             playerPicker model
@@ -37,12 +39,14 @@ view model =
 
 leftPortion : Model -> Html Msg
 leftPortion model =
-    div [ class "left" ] []
+    [ Maybe.map (\p -> playerScore (Tuple.first model.score) (model.turn /= p) p) model.player ]
+        |> unwrapping (div [ class "left" ])
 
 
 rightPortion : Model -> Html Msg
 rightPortion model =
-    div [ class "right" ] []
+    [ Maybe.map (\p -> playerScore (Tuple.second model.score) (model.turn /= p) p) model.opponent ]
+        |> unwrapping (div [ class "right" ])
 
 
 template_ : List (Html Msg) -> Html Msg
@@ -156,10 +160,18 @@ playerPicker model =
         ]
 
 
-playerScore : Int -> Player -> Html msg
-playerScore score player =
-    div [ class "score" ]
-        [ span [ playerClass player ] [ text <| toString score ]
+playerScore : Int -> Bool -> Player -> Html msg
+playerScore score disabled player =
+    div
+        (class "score"
+            :: playerClass player
+            :: (if disabled then
+                    [ class "disabled" ]
+                else
+                    []
+               )
+        )
+        [ span [] [ text <| toString score ]
         ]
 
 
@@ -172,13 +184,3 @@ unwrapping wrapper ls =
 unwrapped : String -> List (Maybe (Html msg)) -> Html msg
 unwrapped divClass ls =
     unwrapping (div [ class divClass ]) ls
-
-
-withWrapper : String -> Maybe (Html msg) -> Html msg
-withWrapper divClass html =
-    let
-        wrapper =
-            div [ class divClass ]
-    in
-    Maybe.map (wrapper << List.singleton) html
-        |> Maybe.withDefault (wrapper [])
