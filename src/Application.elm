@@ -44,6 +44,7 @@ update msg model =
                 |> Return.map (Game.update move idx)
                 |> Return.map Game.unlock
                 |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
+                |> Return.map updateScoreFromGame
 
         SetOponent p ->
             Return.singleton { model | opponent = Just p }
@@ -71,10 +72,10 @@ update msg model =
                 |> Return.effect_ (emitInRoom "rematch" <| Board.encode <| Board.cubic n)
 
         Play move idx ->
-            -- TODO: Emit movement including board index
             Return.singleton model.game
                 |> Return.map (Game.update move idx >> Game.lock)
                 |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
+                |> Return.map updateScoreFromGame
                 |> Return.effect_ (emitInRoom "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
 
         -- PlayerChoose msgs
@@ -97,8 +98,8 @@ update msg model =
 init : ( Model, Cmd Msg )
 init =
     Return.singleton Model.default
-        --|> Return.command (SocketIO.connect "http://localhost:8000")
-        |> Return.command (SocketIO.connect "")
+        |> Return.command (SocketIO.connect "http://localhost:8000")
+        --|> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "joinedGame")
         |> Return.command (SocketIO.listen "socketid")
@@ -167,3 +168,21 @@ emitInRoom event value =
         model.room
             |> Maybe.map (\r -> SocketIO.emit event (Room.encode r value))
             |> Maybe.withDefault Cmd.none
+
+
+updateScore : Player -> Player -> ( Int, Int ) -> ( Int, Int )
+updateScore currentPlayer player ( playerScore, opponentScore ) =
+    if currentPlayer == player then
+        ( playerScore + 1, opponentScore )
+    else
+        ( playerScore, opponentScore + 1 )
+
+
+updateScoreFromGame : Model -> Model
+updateScoreFromGame model =
+    Just updateScore
+        |> Maybe.andMap model.player
+        |> Maybe.andMap (Maybe.map Tuple.first model.game.win)
+        |> Maybe.andMap (Just model.score)
+        |> Maybe.map (\score -> { model | score = score })
+        |> Maybe.withDefault model

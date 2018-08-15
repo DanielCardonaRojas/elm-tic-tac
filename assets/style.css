@@ -1,5 +1,10 @@
 .cube {
     transform: rotate(-20deg) translateX(62px);
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
 }
 
 body {
@@ -25,7 +30,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    text-align: center;
+    align-items: center;
 }
 
 .gametitle {
@@ -117,3 +122,36 @@ input {
     align-items: center;
     justify-content: center;
 }
+
+.left, .right, .center {
+    flex-grow: 1;
+    text-align: center;
+    height: 100%;
+}
+
+.score {
+    padding: 1rem;
+    margin: 0 1rem;
+    background-color: #c7c7c7;
+    color: #768899;
+}
+
+.score.playerx {
+    background-color: #ff8585;
+}
+
+.score.playero {
+    background-color: #7fffd3;
+}
+
+.score.disabled {
+    opacity: 0.2;
+}
+
+.main {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+} 

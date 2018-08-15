@@ -24,40 +24,53 @@ view model =
                 |> template
 
         GamePlay ->
-            model.player
-                |> Maybe.map (Game.render model.game)
-                |> Maybe.withDefault (text "No player in game")
-                |> template
+            [ leftPortion model
+            , Maybe.map (Game.render model.game) model.player
+                |> List.singleton
+                |> unwrapping (div [ class "center" ])
+            , rightPortion model
+            ]
+                |> template_
 
         PlayerChoose ->
             playerPicker model
                 |> template
 
 
-template : Html Msg -> Html Msg
-template html =
+leftPortion : Model -> Html Msg
+leftPortion model =
+    [ Maybe.map (\p -> playerScore (Tuple.first model.score) (model.turn /= p) "You" p) model.player ]
+        |> unwrapping (div [ class "left" ])
+
+
+rightPortion : Model -> Html Msg
+rightPortion model =
+    [ Maybe.map (\p -> playerScore (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent ]
+        |> unwrapping (div [ class "right" ])
+
+
+template_ : List (Html Msg) -> Html Msg
+template_ html =
     div [ class "elm-tic-tac" ]
         [ span [ class "gametitle" ] [ text "Elm-Tic-Tac" ]
-        , html
+        , div [ class "main" ] html
         , footer
         ]
 
 
-turnIndicator : Model -> Html Msg
-turnIndicator model =
-    let
-        turnMessage player turn =
-            if player == turn then
-                span [ class "active" ]
-                    [ text "Your turn" ]
-            else
-                span [ class "inactive" ]
-                    [ text "Waiting for opponent move" ]
-    in
-    Just turnMessage
-        |> Maybe.andMap model.player
-        |> Maybe.andMap (Just model.turn)
-        |> Maybe.withDefault (text "Board blocked")
+template : Html Msg -> Html Msg
+template html =
+    template_ <| List.singleton html
+
+
+turnIndicator : Player -> Player -> Html Msg
+turnIndicator player turn =
+    if player == turn then
+        span [ class "active" ]
+            [ text "Your turn" ]
+    else
+        span [ class "inactive" ]
+            [ text "Waiting for opponent move" ]
 
 
 footer : Html msg
@@ -93,6 +106,35 @@ rematch model =
     div [ class "rematch" ] [ text "Rematch" ]
 
 
+playerClass : Player -> Attribute msg
+playerClass p =
+    toString p |> String.toLower |> class
+
+
+playerPicker_ : Player -> Player -> Html Msg
+playerPicker_ player opponent =
+    let
+        activeAttr p =
+            if p == player then
+                [ class "is-active" ]
+            else
+                []
+
+        enabledFor p =
+            p /= player
+
+        segment player =
+            button
+                (playerClass player :: (onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
+                [ text <| toString player ]
+    in
+    div [ class "picker" ]
+        [ span [] [ text "Choose a player" ]
+        , segment Player.PlayerX
+        , segment Player.PlayerO
+        ]
+
+
 playerPicker : Model -> Html Msg
 playerPicker model =
     let
@@ -101,14 +143,6 @@ playerPicker model =
                 [ class "is-active" ]
             else
                 []
-
-        playerClass p =
-            case p of
-                Player.PlayerX ->
-                    class "playerx"
-
-                Player.PlayerO ->
-                    class "playero"
 
         enabledFor player =
             Maybe.map (\p -> p /= player) model.opponent
@@ -124,3 +158,29 @@ playerPicker model =
         , segment Player.PlayerX
         , segment Player.PlayerO
         ]
+
+
+playerScore : Int -> Bool -> String -> Player -> Html msg
+playerScore score disabled title player =
+    div
+        (class "score"
+            :: playerClass player
+            :: (if disabled then
+                    [ class "disabled" ]
+                else
+                    []
+               )
+        )
+        [ span [] [ text <| title ++ ": " ++ toString score ]
+        ]
+
+
+unwrapping : (List (Html msg) -> Html msg) -> List (Maybe (Html msg)) -> Html msg
+unwrapping wrapper ls =
+    List.filterMap identity ls
+        |> wrapper
+
+
+unwrapped : String -> List (Maybe (Html msg)) -> Html msg
+unwrapped divClass ls =
+    unwrapping (div [ class divClass ]) ls
