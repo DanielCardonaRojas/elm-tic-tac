@@ -33,11 +33,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         -- Remote
-        NewGameMulti n ->
-            Return.singleton { model | player = Maybe.map Player.switch model.player, game = Game.make n }
+        NewGame n ->
+            Return.singleton { model | game = Game.make n, player = model.opponent, opponent = model.player }
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
                 |> Return.map (\m -> { m | turn = Player.PlayerX })
-                |> Debug.log "NewGameMulti"
 
         Opponent move idx ->
             Return.singleton model.game
@@ -65,8 +64,8 @@ update msg model =
         RoomSetup str ->
             Return.singleton { model | scene = MatchSetup str }
 
-        PlayAgainMulti n ->
-            Return.singleton { model | game = Game.make n, player = Maybe.map Player.switch model.player }
+        PlayAgain n ->
+            Return.singleton { model | game = Game.make n, player = model.opponent, opponent = model.player }
                 |> Return.map (\m -> { m | turn = Player.PlayerX })
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
                 |> Return.effect_ (emitInRoom "rematch" <| Board.encode <| Board.cubic n)
@@ -134,7 +133,7 @@ subscriptions model =
 
                 "rematch" ->
                     Board.decode
-                        |> Decode.map (NewGameMulti << .size)
+                        |> Decode.map (NewGame << .size)
 
                 "socketid" ->
                     Decode.string

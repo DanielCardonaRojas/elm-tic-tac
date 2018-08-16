@@ -98,6 +98,7 @@ gameSetup enabled room =
         , input [ onInput (String.trim >> String.toLower >> RoomSetup), placeholder "Enter room name", disabled <| not enabled ] []
         , button [ onClick <| CreateGame room, disabled <| not enabled ] [ text "Create Game" ]
         , button [ onClick <| SelectRoom room, disabled <| not enabled ] [ text "Join" ]
+        , p [] [ text "Elm-Tic-Tac is a two player online 3D tic tac toe game" ]
         ]
 
 

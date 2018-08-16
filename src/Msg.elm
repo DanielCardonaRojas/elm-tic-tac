@@ -12,9 +12,9 @@ type Msg
     | SelectRoom String -- Set by player to join room
     | CreateGame String -- Create socket.io room on server
     | RoomSetup String -- Input when user types
-    | NewGameMulti Int
+    | NewGame Int
     | SetPlayer Player
     | SetOponent Player
-    | PlayAgainMulti Int
+    | PlayAgain Int
     | SetupReady
     | NoOp
