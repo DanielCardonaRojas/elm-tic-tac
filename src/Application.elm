@@ -11,8 +11,6 @@ import Json.Encode as Encode exposing (Value)
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
-import Ports.Echo as Echo
-import Ports.LocalStorage as LocalStorage
 import Ports.SocketIO as SocketIO
 import Respond exposing (Respond)
 import Return
@@ -97,8 +95,8 @@ update msg model =
 init : ( Model, Cmd Msg )
 init =
     Return.singleton Model.default
-        |> Return.command (SocketIO.connect "http://localhost:8000")
-        --|> Return.command (SocketIO.connect "")
+        --|> Return.command (SocketIO.connect "http://localhost:8000")
+        |> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "joinedGame")
         |> Return.command (SocketIO.listen "socketid")
