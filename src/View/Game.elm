@@ -12,35 +12,33 @@ import View.Board as Board
 render : Game -> Player -> Html Msg
 render game player =
     let
-        winTitle winner =
-            if player == winner then
-                h2 [] [ text "You win" ]
-            else
-                h2 [] [ text "You loose" ]
-
         lockedBoard =
             renderBoard (Game.lock game) player
 
         board =
             renderBoard game player
+
+        rematchButton =
+            button [ onClick <| PlayAgain <| Game.size game ] [ text "Rematch" ]
     in
     case game.status of
         Winner p moves ->
             div [ class "game" ]
-                [ winTitle p
+                [ rematchButton
                 , lockedBoard
                 ]
 
         Tie ->
             div [ class "game" ]
-                [ text "Tie"
-                , button [ onClick <| PlayAgainMulti 3 ] [ text "Play Again" ]
+                [ h2 [] [ text "Tie" ]
+                , button [ onClick <| PlayAgain 3 ] [ text "Play Again" ]
                 , lockedBoard
                 ]
 
         Playing ->
             div [ class "game" ]
-                [ board
+                [ h2 [] [ text "Playing" ]
+                , board
                 ]
 
 

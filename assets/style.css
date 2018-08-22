@@ -42,10 +42,16 @@ body {
 .picker, .setup {
     display: flex;
     flex-direction: column;
-    background-color: #c7c7c7;
+    /*background-color: #c7c7c7;*/
+    background-color: darkslateblue;
     padding: 2rem;
     font-size: 1rem;
     border-radius: 6px;
+}
+
+.setup p {
+    color: white;
+    font-size: 0.8rem;
 }
 
 input {

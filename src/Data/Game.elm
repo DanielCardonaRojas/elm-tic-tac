@@ -5,6 +5,7 @@ module Data.Game
         , enable
         , lock
         , make
+        , size
         , unlock
         , update
         )
@@ -60,6 +61,11 @@ unlock game =
 enable : Bool -> Game -> Game
 enable bool game =
     { game | board = Board.enabled bool game.board }
+
+
+size : Game -> Int
+size game =
+    Board.size game.board
 
 
 

@@ -50,9 +50,11 @@ io.on('connection', function (socket) {
         socket.broadcast.to(room).emit('chosePlayer', data);
     });
 
-    socket.on('rematch', function(data){
+    socket.on('rematch', function(payload){
         console.log('rematch');
+        const data = payload.data;
+        const room = payload.room;
         console.log(data);
-        socket.broadcast.emit('rematch', data);
+        socket.broadcast.to(room).emit('rematch', data);
     });
 });
