@@ -106,6 +106,6 @@ winning moves =
         spots =
             Maybe.map (List.map Move.positioned3D) moves
     in
-    Just (,)
+    Just (\x y -> ( x, y ))
         |> Maybe.andMap player
         |> Maybe.andMap spots

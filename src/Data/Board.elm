@@ -77,7 +77,7 @@ encode (Board board) =
 
 decode : Decoder { size : Int, cubic : Bool }
 decode =
-    Pipeline.decode (\s c -> { size = s, cubic = c } |> Debug.log "Board.decode")
+    Decode.succeed (\s c -> { size = s, cubic = c })
         |> required "size" Decode.int
         |> required "cubic" Decode.bool
 
@@ -233,7 +233,7 @@ verticalRowBoard (Board board) k =
 
 
 fromVerticalColumnBoard : Int -> List Move -> List Move3D
-fromVerticalColumnBoard k moves =
+fromVerticalColumnBoard k boardMoves =
     let
         -- Undo operations of projecting along column
         undoProjection m =
@@ -243,11 +243,11 @@ fromVerticalColumnBoard k moves =
             , board = m.row
             }
     in
-    List.map undoProjection moves
+    List.map undoProjection boardMoves
 
 
 fromVerticalRowBoard : Int -> List Move -> List Move3D
-fromVerticalRowBoard k moves =
+fromVerticalRowBoard k boardMoves =
     let
         -- Undo operations of projecting along column
         undoProjection m =
@@ -257,7 +257,7 @@ fromVerticalRowBoard k moves =
             , board = m.row
             }
     in
-    List.map undoProjection moves
+    List.map undoProjection boardMoves
 
 
 horizontalBoard : Board Cubic -> Int -> List Move
@@ -367,21 +367,21 @@ samePlayer mvs =
 
 
 checkpass : Int -> List Move -> Maybe (List Move)
-checkpass n moves =
-    Just moves
+checkpass n boardMoves =
+    Just boardMoves
         |> Maybe.filter (\mvs -> List.length mvs == n)
         |> Maybe.filter (\mvs -> samePlayer mvs)
 
 
 didWin : Int -> List Move -> Maybe (List Move)
-didWin n moves =
+didWin n boardMoves =
     let
         vertical k =
-            List.filter (\mv -> mv.column == k) moves
+            List.filter (\mv -> mv.column == k) boardMoves
                 |> checkpass n
 
         horizontal i =
-            List.filter (\mv -> mv.row == i) moves
+            List.filter (\mv -> mv.row == i) boardMoves
                 |> checkpass n
 
         diagonal1 =
@@ -390,7 +390,7 @@ didWin n moves =
                     List.range 0 (n - 1)
                         |> List.map2 (\x y -> { column = x, row = y }) (List.range 0 (n - 1))
             in
-            List.filter (\m -> List.member (Move.positioned m) d1) moves
+            List.filter (\m -> List.member (Move.positioned m) d1) boardMoves
                 |> checkpass n
                 |> List.singleton
 
@@ -401,7 +401,7 @@ didWin n moves =
                         |> List.reverse
                         |> List.map2 (\x y -> { column = x, row = y }) (List.range 0 (n - 1))
             in
-            List.filter (\m -> List.member (Move.positioned m) d1) moves
+            List.filter (\m -> List.member (Move.positioned m) d1) boardMoves
                 |> checkpass n
                 |> List.singleton
 
