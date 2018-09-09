@@ -1,5 +1,6 @@
 module Application exposing (main)
 
+import Browser
 import Data.Board as Board exposing (Board, Cubic, Flat)
 import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
@@ -17,10 +18,10 @@ import Return
 import View
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    Html.program
-        { init = init
+    Browser.element
+        { init = always init
         , update = update
         , view = View.view
         , subscriptions = subscriptions
@@ -89,7 +90,7 @@ update msg model =
             Return.singleton { model | socketId = Just str }
 
         NoOp ->
-            model ! []
+            Return.singleton model
 
 
 init : ( Model, Cmd Msg )
@@ -115,15 +116,13 @@ subscriptions model =
                         |> Decode.map
                             (\m ->
                                 Opponent (Move.as2D m) m.board
-                                    |> Debug.log "socket.io move"
+                             --|> Debug.log "socket.io move"
                             )
 
                 "joinedGame" ->
                     Decode.string
                         |> Decode.map
-                            (Debug.log "joinedGame socket"
-                                >> always SetupReady
-                            )
+                            (always SetupReady)
 
                 "chosePlayer" ->
                     Player.decode

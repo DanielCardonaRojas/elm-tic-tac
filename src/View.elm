@@ -109,7 +109,7 @@ rematch model =
 
 playerClass : Player -> Attribute msg
 playerClass p =
-    toString p |> String.toLower |> class
+    "player" ++ Player.toString p |> String.toLower |> class
 
 
 playerPicker_ : Player -> Player -> Html Msg
@@ -124,10 +124,10 @@ playerPicker_ player opponent =
         enabledFor p =
             p /= player
 
-        segment player =
+        segment player_ =
             button
-                (playerClass player :: (onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
-                [ text <| toString player ]
+                (playerClass player_ :: (onClick <| SetPlayer player_) :: (disabled <| not <| enabledFor player_) :: activeAttr player_)
+                [ text <| "player" ++ Player.toString player_ ]
     in
     div [ class "picker" ]
         [ span [] [ text "Choose a player" ]
@@ -152,7 +152,7 @@ playerPicker model =
         segment player =
             button
                 (playerClass player :: (onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
-                [ text <| toString player ]
+                [ text <| "Player" ++ Player.toString player ]
     in
     div [ class "picker" ]
         [ span [] [ text "Choose a player" ]
@@ -172,7 +172,7 @@ playerScore score disabled title player =
                     []
                )
         )
-        [ span [] [ text <| title ++ ": " ++ toString score ]
+        [ span [] [ text <| title ++ ": " ++ String.fromInt score ]
         ]
 
 

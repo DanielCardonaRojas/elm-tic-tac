@@ -31,7 +31,7 @@ type alias Move3D =
 
 decode : Decoder Move
 decode =
-    Pipeline.decode (\p c r -> { player = p, column = c, row = r })
+    Decode.succeed (\p c r -> { player = p, column = c, row = r })
         |> required "player" Player.decode
         |> required "column" Decode.int
         |> required "row" Decode.int
@@ -48,7 +48,7 @@ encode move =
 
 decode3D : Decoder Move3D
 decode3D =
-    Pipeline.decode (\p c r idx -> { player = p, column = c, row = r, board = idx })
+    Decode.succeed (\p c r idx -> { player = p, column = c, row = r, board = idx })
         |> required "player" Player.decode
         |> required "column" Decode.int
         |> required "row" Decode.int

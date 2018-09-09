@@ -11,12 +11,10 @@ import Html.Events as Events exposing (..)
 boardLayout : Int -> Attribute msg
 boardLayout n =
     let
-        columnTemplate n =
-            "repeat(" ++ toString n ++ ", 1fr)"
+        columnTemplate m =
+            "repeat(" ++ String.fromInt m ++ ", 1fr)"
     in
-    style
-        [ ( "grid-template-columns", columnTemplate n )
-        ]
+    style "grid-template-columns" <| columnTemplate n
 
 
 render3D : (Positioned3D {} -> msg) -> Board Cubic -> Html msg
@@ -69,8 +67,8 @@ move enabled emptyTagger m =
                 ]
 
         tileClass =
-            Maybe.map (String.append "tile " << String.toLower << toString) m.player
+            Maybe.map (String.append "tile player" << String.toLower << Player.toString) m.player
                 |> Maybe.withDefault "tile"
     in
-    button (class tileClass :: id (toString m) :: (disabled <| not enabled) :: attrs)
+    button (class tileClass :: (disabled <| not enabled) :: attrs)
         []

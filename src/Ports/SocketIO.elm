@@ -20,8 +20,8 @@ port emit_ : ( String, Encode.Value ) -> Cmd msg
 
 
 emit : String -> Encode.Value -> Cmd msg
-emit =
-    curry emit_
+emit name value =
+    emit_ ( name, value )
 
 
 send : Encode.Value -> Cmd msg
@@ -62,9 +62,5 @@ traceDecoder message decoder =
                         Decode.succeed decoded
 
                     Err err ->
-                        let
-                            _ =
-                                Debug.log message err
-                        in
-                        Decode.fail err
+                        Decode.fail <| Decode.errorToString err
             )

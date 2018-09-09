@@ -8,9 +8,11 @@ type alias Room o =
     , data : o
     }
 
+
 name : String -> d -> Room d
-name name data =
-    Room name data
+name title data =
+    Room title data
+
 
 encode_ : Room o -> (o -> Value) -> Value
 encode_ room encoder =
@@ -18,6 +20,7 @@ encode_ room encoder =
         [ ( "data", encoder room.data )
         , ( "room", Encode.string room.name )
         ]
+
 
 encode : String -> Value -> Value
 encode room data =
