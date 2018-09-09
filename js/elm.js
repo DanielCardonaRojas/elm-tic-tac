@@ -2,7 +2,10 @@ import Elm from "../src/Application.elm";
 
 var socketio = require('socket.io-client');
 
-var app = Elm.Application.fullscreen();
+var app = Elm.Elm.Application.init({
+    node: document.getElementById("application")
+});
+
 
 const storage = window.localStorage || {
     setItem(k, v) {
@@ -12,27 +15,6 @@ const storage = window.localStorage || {
         return this[k];
     }
 };
-
-// LocalStorage
-function storeObject(key, object) {
-    storage.setItem(key, JSON.stringify(object));
-}
-
-function retrieveObject(key) {
-    const value = storage.getItem(key);
-    return value ? JSON.parse(value) : null;
-}
-
-app.ports.storeSession.subscribe(function(session) {
-    storeObject("session", session);
-    var sessionData = retrieveObject("session");
-    app.ports.onSessionChange.send(sessionData);
-});
-
-app.ports.retrieveSession.subscribe(function() {
-    var sessionData = retrieveObject("session");
-    app.ports.onSessionChange.send(sessionData);
-});
 
 // SocketIO 
 app.ports.connect.subscribe(function(str){
@@ -52,8 +34,3 @@ app.ports.connect.subscribe(function(str){
         });
     });
 });
-
-// Echo
-app.ports.shout.subscribe(function(object){
-   app.ports.hear.send(object); 
-})

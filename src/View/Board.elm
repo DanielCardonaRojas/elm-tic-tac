@@ -67,7 +67,7 @@ move enabled emptyTagger m =
                 ]
 
         tileClass =
-            Maybe.map (String.append "tile " << Player.toString) m.player
+            Maybe.map (String.append "tile player" << String.toLower << Player.toString) m.player
                 |> Maybe.withDefault "tile"
     in
     button (class tileClass :: (disabled <| not enabled) :: attrs)
