@@ -40,13 +40,30 @@ body {
 }
 
 .picker, .setup {
+    /*background-color: #c7c7c7;*/
     display: flex;
     flex-direction: column;
-    /*background-color: #c7c7c7;*/
     background-color: darkslateblue;
     padding: 2rem;
     font-size: 1rem;
     border-radius: 6px;
+    align-self: center;
+}
+
+.setup {
+    margin-top: 20%;
+}
+
+.picker {
+    margin-top: auto;
+}
+
+.initial-screen {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .setup p {
@@ -133,6 +150,20 @@ input {
     flex-grow: 1;
     text-align: center;
     height: 100%;
+}
+
+.right {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.room-connection {
+    background-color: #272727;
+    color: antiquewhite;
+    padding: 1rem;
+    text-align: left;
+    margin-top: auto;
 }
 
 .score {

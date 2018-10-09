@@ -16,8 +16,12 @@ view : Model -> Html Msg
 view model =
     case model.scene of
         MatchSetup str ->
-            gameSetup (model.room == Nothing) str
-                |> template
+            [ gameSetup (model.room == Nothing) str |> Just
+            , Maybe.map roomInfo model.room
+            ]
+                |> unwrapping (div [ class "initial-screen" ])
+                |> List.singleton
+                |> template_
 
         Rematch ->
             rematch model
@@ -33,8 +37,12 @@ view model =
                 |> template_
 
         PlayerChoose ->
-            playerPicker model
-                |> template
+            [ playerPicker model |> Just
+            , Maybe.map roomInfo model.room
+            ]
+                |> unwrapping (div [ class "initial-screen" ])
+                |> List.singleton
+                |> template_
 
 
 leftPortion : Model -> Html Msg
@@ -45,8 +53,17 @@ leftPortion model =
 
 rightPortion : Model -> Html Msg
 rightPortion model =
-    [ Maybe.map (\p -> playerScore (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent ]
+    [ Maybe.map (\p -> playerScore (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
+    , Maybe.map roomInfo model.room
+    ]
         |> unwrapping (div [ class "right" ])
+
+
+roomInfo : String -> Html Msg
+roomInfo roomName =
+    div [ class "room-connection" ]
+        [ text <| "Connected to room: " ++ roomName
+        ]
 
 
 template_ : List (Html Msg) -> Html Msg
