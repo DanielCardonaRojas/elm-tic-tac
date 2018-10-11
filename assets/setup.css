@@ -1,0 +1,51 @@
+.setup p {
+    color: white;
+    font-size: 0.8rem;
+}
+
+.picker button, .setup button {
+    margin: 5px 0;
+    padding: 7px;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.setup button {
+    background-color: #3fff7f;
+    border: none;
+    color: lightslategrey;
+}
+
+.picker button.is-active {
+    border-color: #778899;
+    border-width: 3px;
+    outline: none;
+}
+
+.picker button:disabled {
+    background-color: light;
+    color: lightgray;
+    background-color: #77889969;
+    border: none;
+}
+
+.picker, .setup {
+    /*background-color: #c7c7c7;*/
+    display: flex;
+    flex-direction: column;
+    background-color: darkslateblue;
+    padding: 2rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    align-self: center;
+}
+
+.setup {
+    margin-top: 20%;
+}
+
+.picker {
+    margin-top: auto;
+}
+
