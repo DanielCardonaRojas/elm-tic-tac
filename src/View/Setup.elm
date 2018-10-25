@@ -1,26 +1,55 @@
 module View.Setup exposing (connection, playerPicker)
 
+import Constants as Const
 import Data.Player as Player exposing (Player(..))
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Element exposing (Element, el, fill, height, text, width)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
+import Element.Input as Input
+import Html exposing (Html)
+import Html.Attributes
+import Html.Events
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
 
 
-connection : Bool -> String -> Html Msg
+connection : Bool -> String -> Element Msg
 connection enabled room =
-    div [ class "setup" ]
-        [ h3 [] [ text "Create a new match or join one" ]
-        , input [ onInput (String.trim >> String.toLower >> RoomSetup), placeholder "Enter room name", disabled <| not enabled ] []
-        , button [ onClick <| CreateGame room, disabled <| not enabled ] [ text "Create Game" ]
-        , button [ onClick <| SelectRoom room, disabled <| not enabled ] [ text "Join" ]
-        , p [] [ text "Elm-Tic-Tac is a two player online 3D tic tac toe game" ]
+    let
+        containerAttrs =
+            [ Background.color Const.ui.themeColor.paneBackground
+            , Element.spacing 20
+            , Element.paddingXY 20 30
+            , Font.color Const.colors.gray
+            , Border.rounded 10
+            ]
+
+        button txt msg =
+            Input.button
+                [ Element.transparent <| not enabled
+                , Element.centerX
+                , Element.padding 10
+                , width fill
+                , Background.color <| Const.ui.themeColor.paneButtonBackground
+                ]
+                { label = el [ Element.centerX ] <| text txt, onPress = Just msg }
+    in
+    Element.column containerAttrs
+        [ Input.text [ Element.transparent <| not enabled ]
+            { onChange = String.trim >> String.toLower >> RoomSetup
+            , placeholder = Just <| Input.placeholder [] <| text "Enter room name"
+            , label = Input.labelAbove [ Font.size Const.ui.fontSize.medium ] <| text "Create a new match or join one"
+            , text = room
+            }
+        , button "Create Game" <| CreateGame room
+        , button "Join" <| SelectRoom room
+        , el [ Element.centerX, Font.size Const.ui.fontSize.small ] <| text "Elm-Tic-Tac is a two player online 3D tic tac toe game"
         ]
 
 
-playerPicker : Model -> Html Msg
+playerPicker : Model -> Element Msg
 playerPicker model =
     let
         activeAttr player =
@@ -34,41 +63,19 @@ playerPicker model =
                 |> Maybe.withDefault True
 
         segment player =
-            button
-                (playerClass player :: (onClick <| SetPlayer player) :: (disabled <| not <| enabledFor player) :: activeAttr player)
-                [ text <| "Player" ++ Player.toString player ]
+            Input.button ([ Element.transparent <| not <| enabledFor player ] ++ activeAttr player)
+                { label = text <| "Player" ++ Player.toString player, onPress = Just <| SetPlayer player }
     in
-    div [ class "picker" ]
-        [ span [] [ text "Choose a player" ]
+    Element.column [ class "picker" ]
+        [ el [] <| text "Choose a player"
         , segment Player.PlayerX
         , segment Player.PlayerO
         ]
 
 
-playerClass : Player -> Attribute msg
+class =
+    Element.htmlAttribute << Html.Attributes.class
+
+
 playerClass p =
     "player" ++ Player.toString p |> String.toLower |> class
-
-
-playerPicker_ : Player -> Player -> Html Msg
-playerPicker_ player opponent =
-    let
-        activeAttr p =
-            if p == player then
-                [ class "is-active" ]
-            else
-                []
-
-        enabledFor p =
-            p /= player
-
-        segment player_ =
-            button
-                (playerClass player_ :: (onClick <| SetPlayer player_) :: (disabled <| not <| enabledFor player_) :: activeAttr player_)
-                [ text <| "player" ++ Player.toString player_ ]
-    in
-    div [ class "picker" ]
-        [ span [] [ text "Choose a player" ]
-        , segment Player.PlayerX
-        , segment Player.PlayerO
-        ]
