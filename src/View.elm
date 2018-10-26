@@ -4,7 +4,7 @@ module View exposing (view)
 
 import Constants as Const
 import Data.Player as Player exposing (Player)
-import Element exposing (Element, el, fill, height, text, width)
+import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
 import Element.Font as Font
 import Html.Attributes
@@ -23,23 +23,23 @@ viewElement : Model -> Element Msg
 viewElement model =
     case model.scene of
         MatchSetup str ->
-            Element.column [ Element.spaceEvenly, Element.centerX ]
+            Element.column [ Element.centerX ]
                 [ Setup.connection (model.room == Nothing) str
-                , maybe roomInfo model.room
+                , maybe (roomInfo []) model.room
                 ]
                 |> template
 
         PlayerChoose ->
-            Element.column []
+            Element.column [ Element.centerX ]
                 [ Setup.playerPicker model
-                , maybe roomInfo model.room
+                , maybe (roomInfo []) model.room
                 ]
                 |> template
 
         GamePlay ->
-            Element.column [ class "center" ]
+            Element.row [ class "gameplay", Element.centerX, width fill, height fill ]
                 [ leftPortion model
-                , maybe (Game.render model.game >> Element.html) model.player
+                , centerPortion model
                 , rightPortion model
                 ]
                 |> template
@@ -49,17 +49,39 @@ viewElement model =
                 |> template
 
 
+centerPortion : Model -> Element Msg
+centerPortion model =
+    maybe
+        (Game.render
+            [ class "game_"
+            , width <| Element.fillPortion 2
+            , height fill
+            , Element.padding Const.ui.spacing.normal
+            ]
+            model.game
+        )
+        model.player
+
+
 leftPortion : Model -> Element Msg
 leftPortion model =
-    Element.column [ class "left" ]
+    Element.column
+        [ width <| Element.fillPortion 1
+        , height fill
+        , Element.padding Const.ui.spacing.normal
+        ]
         [ maybe (\p -> playerScore (Tuple.first model.score) (model.turn /= p) "You" p) model.player ]
 
 
 rightPortion : Model -> Element Msg
 rightPortion model =
-    Element.column [ class "right" ]
+    Element.column
+        [ width <| Element.fillPortion 1
+        , height fill
+        , Element.padding Const.ui.spacing.normal
+        ]
         [ maybe (\p -> playerScore (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
-        , maybe roomInfo model.room
+        , maybe (roomInfo [ Element.alignBottom ]) model.room
         ]
 
 
@@ -67,9 +89,9 @@ maybe f =
     Maybe.map f >> Maybe.withDefault Element.none
 
 
-roomInfo : String -> Element Msg
-roomInfo roomName =
-    el [ class "room-connection" ] <|
+roomInfo : List (Attribute Msg) -> String -> Element Msg
+roomInfo attrs roomName =
+    el attrs <|
         text <|
             "Connected to room: "
                 ++ roomName
@@ -80,7 +102,7 @@ template html =
     Element.column [ height fill, width fill, Element.spaceEvenly, Background.color Const.ui.themeColor.background, Font.family [ Font.monospace ] ]
         [ el [ Element.centerX, Element.padding 10, Font.color Const.ui.themeColor.accentBackground, Font.size Const.ui.fontSize.large ] <|
             text "Elm-Tic-Tac"
-        , el [ width fill ] html
+        , html
         , footer
         ]
 
@@ -108,20 +130,15 @@ class =
 
 rematch : Model -> Element Msg
 rematch model =
-    el [ class "rematch" ] <| text "Rematch"
+    el [] <| text "Rematch"
 
 
 playerScore : Int -> Bool -> String -> Player -> Element msg
 playerScore score disabled title player =
     el
-        (class "score"
-            :: class (player |> Player.toString |> String.toLower)
-            :: (if disabled then
-                    [ class "disabled" ]
-                else
-                    []
-               )
-        )
+        [ Element.alignTop
+        , class (player |> Player.toString |> String.toLower)
+        ]
     <|
         text <|
             title

@@ -15,31 +15,42 @@ import Model exposing (..)
 import Msg exposing (Msg(..))
 
 
+maybeIf : Bool -> a -> Maybe a
+maybeIf b v =
+    if b then
+        Just v
+    else
+        Nothing
+
+
+paneAttributes =
+    [ Background.color Const.ui.themeColor.paneBackground
+    , Element.spacing Const.ui.spacing.small
+    , Element.paddingXY Const.ui.spacing.small Const.ui.spacing.normal
+    , Font.color Const.colors.gray
+    , Border.rounded 10
+    , Element.centerX
+    ]
+
+
 connection : Bool -> String -> Element Msg
 connection enabled room =
     let
-        containerAttrs =
-            [ Background.color Const.ui.themeColor.paneBackground
-            , Element.spacing 20
-            , Element.paddingXY 20 30
-            , Font.color Const.colors.gray
-            , Border.rounded 10
-            ]
-
         button txt msg =
             Input.button
-                [ Element.transparent <| not enabled
-                , Element.centerX
-                , Element.padding 10
+                [ Element.centerX
+                , Element.padding Const.ui.spacing.small
                 , width fill
                 , Background.color <| Const.ui.themeColor.paneButtonBackground
                 ]
-                { label = el [ Element.centerX ] <| text txt, onPress = Just msg }
+                { label = el [ Element.centerX ] <| text txt
+                , onPress = maybeIf enabled msg
+                }
     in
-    Element.column containerAttrs
-        [ Input.text [ Element.transparent <| not enabled ]
+    Element.column paneAttributes
+        [ Input.text []
             { onChange = String.trim >> String.toLower >> RoomSetup
-            , placeholder = Just <| Input.placeholder [] <| text "Enter room name"
+            , placeholder = maybeIf enabled (Input.placeholder [] <| text "Enter room name")
             , label = Input.labelAbove [ Font.size Const.ui.fontSize.medium ] <| text "Create a new match or join one"
             , text = room
             }
@@ -52,21 +63,24 @@ connection enabled room =
 playerPicker : Model -> Element Msg
 playerPicker model =
     let
-        activeAttr player =
-            if Maybe.map (\p -> p == player) model.player |> Maybe.withDefault False then
-                [ class "is-active" ]
-            else
-                []
+        isCurrentPlayer player =
+            Maybe.map (\p -> p == player) model.player |> Maybe.withDefault False
 
         enabledFor player =
             Maybe.map (\p -> p /= player) model.opponent
                 |> Maybe.withDefault True
 
         segment player =
-            Input.button ([ Element.transparent <| not <| enabledFor player ] ++ activeAttr player)
-                { label = text <| "Player" ++ Player.toString player, onPress = Just <| SetPlayer player }
+            Input.button
+                [ Element.centerX
+                , Element.padding Const.ui.spacing.small
+                , Background.color <| Const.ui.themeColor.paneButtonBackground
+                ]
+                { label = text <| "Player" ++ Player.toString player
+                , onPress = maybeIf (enabledFor player) (SetPlayer player)
+                }
     in
-    Element.column [ class "picker" ]
+    Element.column (width (Element.fill |> Element.minimum 300) :: paneAttributes)
         [ el [] <| text "Choose a player"
         , segment Player.PlayerX
         , segment Player.PlayerO

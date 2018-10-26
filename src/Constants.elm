@@ -12,12 +12,23 @@ import Element exposing (rgb255)
 ui =
     { fontSize = fontSize
     , themeColor = themeDarkColor
+    , spacing = spacing
     }
 
 
 
 -- UI
 -- TODO: Convert this into a function latter on.
+
+
+spacing =
+    { xxSmall = 4
+    , xSmall = 8
+    , small = 16
+    , normal = 32
+    , large = 68
+    , xLarge = 128
+    }
 
 
 fontSize =
