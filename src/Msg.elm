@@ -17,4 +17,5 @@ type Msg
     | SetOponent Player
     | PlayAgain Int
     | SetupReady
+    | WindowResize Int Int
     | NoOp

@@ -20,6 +20,7 @@ type alias Model =
     , room : Maybe String
     , score : ( Int, Int ) -- Player and opponent score
     , scene : Scene
+    , windowSize : ( Int, Int )
     }
 
 
@@ -33,4 +34,5 @@ default =
     , room = Nothing
     , score = ( 0, 0 )
     , scene = MatchSetup ""
+    , windowSize = ( 0, 0 )
     }

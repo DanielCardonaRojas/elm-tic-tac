@@ -1,10 +1,11 @@
-module View.Game exposing (render)
+module View.Game exposing (render, score)
 
 import Constants as Const
 import Data.Game as Game exposing (Game, Status(..))
-import Data.Player as Player exposing (Player)
+import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
+import Element.Font as Font
 import Element.Input as Input
 import Html.Attributes
 import Msg exposing (Msg(..))
@@ -61,3 +62,26 @@ renderBoard game nextPlayer =
         game.board
         |> Element.html
         |> el [ Element.centerX, Element.centerY ]
+
+
+score : Int -> Bool -> String -> Player -> Element msg
+score points disabled title player =
+    let
+        playerColor =
+            if player == PlayerX then
+                Const.colors.red
+            else
+                Const.colors.blue
+    in
+    el
+        [ Element.alignTop
+        , Background.color playerColor
+        , Element.padding Const.ui.spacing.small
+        , Font.center
+        , width fill
+        , if disabled then
+            Element.alpha 0.3
+          else
+            Element.alpha 1.0
+        ]
+        (text <| title ++ ": " ++ String.fromInt points)

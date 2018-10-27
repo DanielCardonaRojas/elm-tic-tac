@@ -81,7 +81,7 @@ playerPicker model =
                 }
     in
     Element.column (width (Element.fill |> Element.minimum 300) :: paneAttributes)
-        [ el [] <| text "Choose a player"
+        [ el [ Element.centerX ] <| text "Choose a player"
         , segment Player.PlayerX
         , segment Player.PlayerO
         ]
@@ -89,7 +89,3 @@ playerPicker model =
 
 class =
     Element.htmlAttribute << Html.Attributes.class
-
-
-playerClass p =
-    "player" ++ Player.toString p |> String.toLower |> class

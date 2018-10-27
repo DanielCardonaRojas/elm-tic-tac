@@ -3,7 +3,7 @@ module View exposing (view)
 --import Html exposing (Html)
 
 import Constants as Const
-import Data.Player as Player exposing (Player)
+import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
 import Element.Font as Font
@@ -13,6 +13,7 @@ import Model exposing (..)
 import Msg exposing (Msg(..))
 import View.Game as Game
 import View.Setup as Setup
+import View.Template as Template
 
 
 view model =
@@ -25,16 +26,16 @@ viewElement model =
         MatchSetup str ->
             Element.column [ Element.centerX ]
                 [ Setup.connection (model.room == Nothing) str
-                , maybe (roomInfo []) model.room
+                , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
                 ]
-                |> template
+                |> Template.primary
 
         PlayerChoose ->
             Element.column [ Element.centerX ]
                 [ Setup.playerPicker model
-                , maybe (roomInfo []) model.room
+                , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
                 ]
-                |> template
+                |> Template.primary
 
         GamePlay ->
             Element.row [ class "gameplay", Element.centerX, width fill, height fill ]
@@ -42,19 +43,17 @@ viewElement model =
                 , centerPortion model
                 , rightPortion model
                 ]
-                |> template
+                |> Template.primary
 
         Rematch ->
-            rematch model
-                |> template
+            Template.primary <| el [] (text "Rematch")
 
 
 centerPortion : Model -> Element Msg
 centerPortion model =
     maybe
         (Game.render
-            [ class "game_"
-            , width <| Element.fillPortion 2
+            [ width <| Element.fillPortion 2
             , height fill
             , Element.padding Const.ui.spacing.normal
             ]
@@ -70,7 +69,7 @@ leftPortion model =
         , height fill
         , Element.padding Const.ui.spacing.normal
         ]
-        [ maybe (\p -> playerScore (Tuple.first model.score) (model.turn /= p) "You" p) model.player ]
+        [ maybe (\p -> Game.score (Tuple.first model.score) (model.turn /= p) "You" p) model.player ]
 
 
 rightPortion : Model -> Element Msg
@@ -80,7 +79,7 @@ rightPortion model =
         , height fill
         , Element.padding Const.ui.spacing.normal
         ]
-        [ maybe (\p -> playerScore (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
+        [ maybe (\p -> Game.score (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
         , maybe (roomInfo [ Element.alignBottom ]) model.room
         ]
 
@@ -91,56 +90,8 @@ maybe f =
 
 roomInfo : List (Attribute Msg) -> String -> Element Msg
 roomInfo attrs roomName =
-    el attrs <|
-        text <|
-            "Connected to room: "
-                ++ roomName
-
-
-template : Element Msg -> Element Msg
-template html =
-    Element.column [ height fill, width fill, Element.spaceEvenly, Background.color Const.ui.themeColor.background, Font.family [ Font.monospace ] ]
-        [ el [ Element.centerX, Element.padding 10, Font.color Const.ui.themeColor.accentBackground, Font.size Const.ui.fontSize.large ] <|
-            text "Elm-Tic-Tac"
-        , html
-        , footer
-        ]
-
-
-footer : Element msg
-footer =
-    Element.column
-        [ Element.centerX, Element.padding 10, Element.spacing 5 ]
-        [ Element.paragraph [ Element.centerX, Font.size Const.ui.fontSize.small ]
-            [ text "The "
-            , Element.newTabLink [ Font.underline ] { url = "https://github.com/DanielCardonaRojas/elm-tic-tac", label = text "code" }
-            , text " for this game is open sourced and written in Elm"
-            ]
-        , el [ Element.centerX, Font.size Const.ui.fontSize.small ] <| text "© 2018 Daniel Cardona Rojas"
-        ]
-
-
-
--- Scenes
+    el attrs <| text ("Connected to room: " ++ roomName)
 
 
 class =
     Element.htmlAttribute << Html.Attributes.class
-
-
-rematch : Model -> Element Msg
-rematch model =
-    el [] <| text "Rematch"
-
-
-playerScore : Int -> Bool -> String -> Player -> Element msg
-playerScore score disabled title player =
-    el
-        [ Element.alignTop
-        , class (player |> Player.toString |> String.toLower)
-        ]
-    <|
-        text <|
-            title
-                ++ ": "
-                ++ String.fromInt score

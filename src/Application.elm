@@ -1,6 +1,9 @@
 module Application exposing (main)
 
+import Basics.Extra exposing (..)
 import Browser
+import Browser.Dom as Dom
+import Browser.Events
 import Data.Board as Board exposing (Board, Cubic, Flat)
 import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
@@ -15,6 +18,7 @@ import Msg exposing (Msg(..))
 import Ports.SocketIO as SocketIO
 import Respond exposing (Respond)
 import Return
+import Task
 import View
 
 
@@ -89,14 +93,27 @@ update msg model =
         SocketID str ->
             Return.singleton { model | socketId = Just str }
 
+        WindowResize w h ->
+            Return.singleton { model | windowSize = ( w, h ) }
+
         NoOp ->
             Return.singleton model
 
 
 init : ( Model, Cmd Msg )
 init =
+    let
+        viewPortToWindowSize vp =
+            vp.scene
+                |> (\s -> ( round s.width, round s.height ))
+    in
     Return.singleton Model.default
         --|> Return.command (SocketIO.connect "http://localhost:8000")
+        |> Return.command
+            (Dom.getViewport
+                |> Task.attempt
+                    (Result.map (viewPortToWindowSize >> uncurry WindowResize) >> Result.withDefault NoOp)
+            )
         |> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "joinedGame")
@@ -145,6 +162,7 @@ subscriptions model =
     in
     Sub.batch
         [ SocketIO.decodeMessage socketIODecoder NoOp
+        , Browser.Events.onResize WindowResize
         ]
 
 

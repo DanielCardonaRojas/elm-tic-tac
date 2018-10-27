@@ -53,4 +53,7 @@ colors =
     , gray = rgb255 119 136 153
     , purple = rgb255 67 49 133
     , white = rgb255 255 255 255
+    , lightGray = rgb255 200 200 200
+    , red = rgb255 255 133 133
+    , blue = rgb255 127 255 211
     }
