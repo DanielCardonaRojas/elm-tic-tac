@@ -8,7 +8,13 @@ import Element.Font as Font
 
 primary : Element msg -> Element msg
 primary html =
-    Element.column [ height fill, width fill, Element.spaceEvenly, Background.color Const.ui.themeColor.background, Font.family [ Font.monospace ] ]
+    Element.column
+        [ height fill
+        , width fill
+        , Element.spaceEvenly
+        , Background.color Const.ui.themeColor.background
+        , Font.family [ Font.monospace ]
+        ]
         [ el [ Element.centerX, Element.padding 10, Font.color Const.ui.themeColor.accentBackground, Font.size Const.ui.fontSize.large ] <|
             text "Elm-Tic-Tac"
         , html

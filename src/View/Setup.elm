@@ -71,10 +71,17 @@ playerPicker model =
                 |> Maybe.withDefault True
 
         segment player =
+            let
+                playerColor =
+                    if player == PlayerX then
+                        Const.colors.red
+                    else
+                        Const.colors.blue
+            in
             Input.button
                 [ Element.centerX
                 , Element.padding Const.ui.spacing.small
-                , Background.color <| Const.ui.themeColor.paneButtonBackground
+                , Background.color <| playerColor
                 ]
                 { label = text <| "Player" ++ Player.toString player
                 , onPress = maybeIf (enabledFor player) (SetPlayer player)
