@@ -9,6 +9,7 @@ import Data.Move as Move exposing (Move, Positioned, Positioned3D)
 import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html
@@ -104,6 +105,7 @@ move enabled emptyTagger m =
                 , width <| Element.px size
                 , height <| Element.px size
                 , Background.color tileColor
+                , Border.color <| Element.rgba 1 1 1 0
                 ]
                 { label = Element.none
                 , onPress = maybeIf enabled msg

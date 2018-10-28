@@ -15,9 +15,22 @@ primary html =
         , Background.color Const.ui.themeColor.background
         , Font.family [ Font.monospace ]
         ]
-        [ el [ Element.centerX, Element.padding 10, Font.color Const.ui.themeColor.accentBackground, Font.size Const.ui.fontSize.large ] <|
+        [ el
+            [ Element.centerX
+            , Element.padding Const.ui.spacing.small
+            , Font.color Const.ui.themeColor.accentBackground
+            , Font.size Const.ui.fontSize.large
+            ]
+          <|
             text "Elm-Tic-Tac"
-        , html
+        , el
+            [ Element.paddingXY Const.ui.spacing.normal 0
+            , Element.centerX
+            , Element.centerY
+            , width fill
+            , height fill
+            ]
+            html
         , footer
         ]
 

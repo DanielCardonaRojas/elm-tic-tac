@@ -24,24 +24,23 @@ viewElement : Model -> Element Msg
 viewElement model =
     case model.scene of
         MatchSetup str ->
-            Element.column [ Element.centerX ]
+            Element.column [ Element.centerX, Element.centerY ]
                 [ Setup.connection (model.room == Nothing) str
                 , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
                 ]
                 |> Template.primary
 
         PlayerChoose ->
-            Element.column [ Element.centerX ]
+            Element.column [ Element.centerX, Element.centerY ]
                 [ Setup.playerPicker model
                 , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
                 ]
                 |> Template.primary
 
         GamePlay ->
-            Element.row [ class "gameplay", Element.centerX, width fill, height fill ]
-                [ leftPortion model
-                , centerPortion model
-                , rightPortion model
+            Element.column [ class "gameplay", Element.centerX, Element.spaceEvenly, width fill, height fill ]
+                [ score model
+                , maybe (Game.render [ Element.centerX, Element.centerY ] model.game) model.player
                 ]
                 |> Template.primary
 
@@ -49,38 +48,15 @@ viewElement model =
             Template.primary <| el [] (text "Rematch")
 
 
-centerPortion : Model -> Element Msg
-centerPortion model =
-    maybe
-        (Game.render
-            [ width <| Element.fillPortion 2
-            , height fill
-            , Element.padding Const.ui.spacing.normal
-            ]
-            model.game
-        )
-        model.player
-
-
-leftPortion : Model -> Element Msg
-leftPortion model =
-    Element.column
-        [ width <| Element.fillPortion 1
-        , height fill
-        , Element.padding Const.ui.spacing.normal
+score : Model -> Element msg
+score model =
+    Element.row
+        [ Element.centerX
+        , Element.spaceEvenly
+        , width fill
         ]
-        [ maybe (\p -> Game.score (Tuple.first model.score) (model.turn /= p) "You" p) model.player ]
-
-
-rightPortion : Model -> Element Msg
-rightPortion model =
-    Element.column
-        [ width <| Element.fillPortion 1
-        , height fill
-        , Element.padding Const.ui.spacing.normal
-        ]
-        [ maybe (\p -> Game.score (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
-        , maybe (roomInfo [ Element.alignBottom ]) model.room
+        [ maybe (\p -> Game.score (Tuple.first model.score) (model.turn /= p) "You" p) model.player
+        , maybe (\p -> Game.score (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
         ]
 
 

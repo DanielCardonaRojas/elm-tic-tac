@@ -45,8 +45,7 @@ render attributes game player =
 
         Playing ->
             Element.column attributes
-                [ el [ Element.centerX ] <| text "Playing"
-                , renderBoard game player
+                [ renderBoard game player
                 ]
 
 
@@ -74,7 +73,7 @@ score points disabled title player =
         , Background.color playerColor
         , Element.padding Const.ui.spacing.small
         , Font.center
-        , width fill
+        , width (Element.maximum 200 fill)
         , if disabled then
             Element.alpha 0.3
           else
