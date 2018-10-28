@@ -92,7 +92,3 @@ playerPicker model =
         , segment Player.PlayerX
         , segment Player.PlayerO
         ]
-
-
-class =
-    Element.htmlAttribute << Html.Attributes.class

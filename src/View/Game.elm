@@ -12,10 +12,6 @@ import Msg exposing (Msg(..))
 import View.Board as Board
 
 
-class =
-    Element.htmlAttribute << Html.Attributes.class
-
-
 render : List (Attribute Msg) -> Game -> Player -> Element Msg
 render attributes game player =
     let

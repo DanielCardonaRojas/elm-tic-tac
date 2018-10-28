@@ -38,7 +38,7 @@ viewElement model =
                 |> Template.primary
 
         GamePlay ->
-            Element.column [ class "gameplay", Element.centerX, Element.spaceEvenly, width fill, height fill ]
+            Element.column [ Element.centerX, Element.spaceEvenly, width fill, height fill ]
                 [ score model
                 , maybe (Game.render [ Element.centerX, Element.centerY ] model.game) model.player
                 ]
@@ -67,7 +67,3 @@ maybe f =
 roomInfo : List (Attribute Msg) -> String -> Element Msg
 roomInfo attrs roomName =
     el attrs <| text ("Connected to room: " ++ roomName)
-
-
-class =
-    Element.htmlAttribute << Html.Attributes.class

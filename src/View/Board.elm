@@ -24,10 +24,6 @@ singleBoard board tiles =
         |> Element.column [ Element.centerY, skew 35, Element.spacing Const.ui.spacing.xxSmall ]
 
 
-class =
-    Element.htmlAttribute << Html.Attributes.class
-
-
 skew : Int -> Attribute msg
 skew degrees =
     Element.htmlAttribute <| Html.Attributes.style "transform" ("skew(" ++ String.fromInt degrees ++ "deg)")
@@ -83,10 +79,6 @@ maybeIf b v =
 move : Bool -> (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Element msg
 move enabled emptyTagger m =
     let
-        tileClass =
-            Maybe.map (String.append "tile player" << String.toLower << Player.toString) m.player
-                |> Maybe.withDefault "tile"
-
         playerColor player =
             if player == PlayerX then
                 Const.colors.red
@@ -101,8 +93,7 @@ move enabled emptyTagger m =
 
         button msg =
             Input.button
-                [ class tileClass
-                , width <| Element.px size
+                [ width <| Element.px size
                 , height <| Element.px size
                 , Background.color tileColor
                 , Border.color <| Element.rgba 1 1 1 0
