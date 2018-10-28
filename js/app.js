@@ -1,2 +1,2 @@
 import "./elm.js";
-import "../assets/board.css";
+//import "../assets/board.css";

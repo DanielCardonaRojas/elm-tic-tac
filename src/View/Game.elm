@@ -28,26 +28,23 @@ render attributes game player =
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = Just msg
                 }
-
-        baseAttrs =
-            attributes
     in
     case game.status of
         Winner p moves ->
-            Element.column baseAttrs
+            Element.column attributes
                 [ button "Rematch" (PlayAgain <| Game.size game)
                 , renderBoard (Game.lock game) player
                 ]
 
         Tie ->
-            Element.column baseAttrs
+            Element.column attributes
                 [ el [ Element.centerX ] <| text "Tie"
                 , button "Play Again" (PlayAgain 3)
                 , renderBoard (Game.lock game) player
                 ]
 
         Playing ->
-            Element.column baseAttrs
+            Element.column attributes
                 [ el [ Element.centerX ] <| text "Playing"
                 , renderBoard game player
                 ]
@@ -60,7 +57,6 @@ renderBoard game nextPlayer =
             Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
         )
         game.board
-        |> Element.html
         |> el [ Element.centerX, Element.centerY ]
 
 
