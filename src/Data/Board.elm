@@ -22,6 +22,7 @@ module Data.Board
         , size
         , spots
         , tiles
+        , tilesAt
         , toggleLock
         , unlock
         )
@@ -110,18 +111,22 @@ locked (Board board) =
     .enabled board
 
 
-tiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
-tiles idx (Board board) =
+tilesAt : BoardIndex -> Board Cubic -> List (Positioned { player : Maybe Player })
+tilesAt k board =
+    boardTiles (clamp 0 (size board - 1) k) <| board
+
+
+tiles : Board Flat -> List (Positioned { player : Maybe Player })
+tiles board =
+    boardTiles 0 board
+
+
+boardTiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
+boardTiles idx (Board board) =
     let
         movesOnBoard =
             List.filter (\m -> m.board == idx) board.moves
-                |> List.map
-                    (\m ->
-                        { column = m.column
-                        , row = m.row
-                        , player = Just m.player
-                        }
-                    )
+                |> List.map (\m -> { column = m.column, row = m.row, player = Just m.player })
 
         allPositions =
             let

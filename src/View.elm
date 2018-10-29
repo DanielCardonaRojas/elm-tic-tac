@@ -1,135 +1,68 @@
 module View exposing (view)
 
---import Html.Attributes exposing (..)
+--import Html exposing (Html)
 
-import Data.Player as Player exposing (Player)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Constants as Const
+import Data.Player as Player exposing (Player(..))
+import Element exposing (Attribute, Element, el, fill, height, text, width)
+import Element.Font as Font
+import Html.Attributes
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
 import View.Game as Game
 import View.Setup as Setup
+import View.Template as Template
 
 
-view : Model -> Html Msg
 view model =
+    Element.layout [] (viewElement model)
+
+
+viewElement : Model -> Element Msg
+viewElement model =
     case model.scene of
         MatchSetup str ->
-            [ Setup.connection (model.room == Nothing) str |> Just
-            , Maybe.map roomInfo model.room
-            ]
-                |> unwrapping (div [ class "initial-screen" ])
-                |> List.singleton
-                |> template_
+            Element.column [ Element.centerX, Element.centerY ]
+                [ Setup.connection (model.room == Nothing) str
+                , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
+                ]
+                |> Template.primary
 
         PlayerChoose ->
-            [ Setup.playerPicker model |> Just
-            , Maybe.map roomInfo model.room
-            ]
-                |> unwrapping (div [ class "initial-screen" ])
-                |> List.singleton
-                |> template_
+            Element.column [ Element.centerX, Element.centerY ]
+                [ Setup.playerPicker model
+                , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
+                ]
+                |> Template.primary
 
         GamePlay ->
-            [ leftPortion model
-            , Maybe.map (Game.render model.game) model.player
-                |> List.singleton
-                |> unwrapping (div [ class "center" ])
-            , rightPortion model
-            ]
-                |> template_
+            Element.column [ Element.centerX, Element.spaceEvenly, width fill, height fill ]
+                [ score model
+                , maybe (Game.render [ Element.centerX, Element.centerY ] model.game) model.player
+                ]
+                |> Template.primary
 
         Rematch ->
-            rematch model
-                |> template
+            Template.primary <| el [] (text "Rematch")
 
 
-leftPortion : Model -> Html Msg
-leftPortion model =
-    [ Maybe.map (\p -> playerScore (Tuple.first model.score) (model.turn /= p) "You" p) model.player ]
-        |> unwrapping (div [ class "left" ])
-
-
-rightPortion : Model -> Html Msg
-rightPortion model =
-    [ Maybe.map (\p -> playerScore (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
-    , Maybe.map roomInfo model.room
-    ]
-        |> unwrapping (div [ class "right" ])
-
-
-roomInfo : String -> Html Msg
-roomInfo roomName =
-    div [ class "room-connection" ]
-        [ text <| "Connected to room: " ++ roomName
+score : Model -> Element msg
+score model =
+    Element.row
+        [ Element.centerX
+        , Element.spaceEvenly
+        , width fill
+        ]
+        [ maybe (\p -> Game.score (Tuple.first model.score) (model.turn /= p) "You" p) model.player
+        , maybe (\p -> Game.score (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
         ]
 
 
-template_ : List (Html Msg) -> Html Msg
-template_ html =
-    div [ class "elm-tic-tac" ]
-        [ span [ class "gametitle" ] [ text "Elm-Tic-Tac" ]
-        , div [ class "main" ] html
-        , footer
-        ]
+maybe f =
+    Maybe.map f >> Maybe.withDefault Element.none
 
 
-template : Html Msg -> Html Msg
-template html =
-    template_ <| List.singleton html
-
-
-footer : Html msg
-footer =
-    div [ class "footer" ]
-        [ span []
-            [ text "The "
-            , a [ href "https://github.com/DanielCardonaRojas/elm-tic-tac", target "_blank" ] [ text "code" ]
-            , text " for this game is open sourced and written in Elm"
-            ]
-        , span
-            []
-            [ text "© 2018 Daniel Cardona Rojas" ]
-        ]
-
-
-playerClass : Player -> Attribute msg
-playerClass p =
-    "player" ++ Player.toString p |> String.toLower |> class
-
-
-
--- Scenes
-
-
-rematch : Model -> Html Msg
-rematch model =
-    div [ class "rematch" ] [ text "Rematch" ]
-
-
-playerScore : Int -> Bool -> String -> Player -> Html msg
-playerScore score disabled title player =
-    div
-        (class "score"
-            :: playerClass player
-            :: (if disabled then
-                    [ class "disabled" ]
-                else
-                    []
-               )
-        )
-        [ span [] [ text <| title ++ ": " ++ String.fromInt score ]
-        ]
-
-
-unwrapping : (List (Html msg) -> Html msg) -> List (Maybe (Html msg)) -> Html msg
-unwrapping wrapper ls =
-    List.filterMap identity ls
-        |> wrapper
-
-
-unwrapped : String -> List (Maybe (Html msg)) -> Html msg
-unwrapped divClass ls =
-    unwrapping (div [ class divClass ]) ls
+roomInfo : List (Attribute Msg) -> String -> Element Msg
+roomInfo attrs roomName =
+    el attrs <| text ("Connected to room: " ++ roomName)
