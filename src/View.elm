@@ -5,7 +5,6 @@ module View exposing (view)
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
-import Element.Background as Background
 import Element.Font as Font
 import Html.Attributes
 import Maybe.Extra as Maybe

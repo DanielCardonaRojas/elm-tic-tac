@@ -4,23 +4,17 @@ import Constants as Const
 import Data.Game as Game exposing (Game, Status(..))
 import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
-import Element.Background as Background
-import Element.Font as Font
 import Element.Input as Input
-import Html.Attributes
 import Msg exposing (Msg(..))
 import View.Board as Board
+import View.Style as Style exposing (style)
 
 
 render : List (Attribute Msg) -> Game -> Player -> Element Msg
 render attributes game player =
     let
         button txt msg =
-            Input.button
-                [ Element.centerX
-                , Element.padding Const.ui.spacing.small
-                , Background.color <| Const.ui.themeColor.paneButtonBackground
-                ]
+            Input.button (Element.centerX :: style Style.Button)
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = Just msg
                 }
@@ -57,22 +51,6 @@ renderBoard game nextPlayer =
 
 score : Int -> Bool -> String -> Player -> Element msg
 score points disabled title player =
-    let
-        playerColor =
-            if player == PlayerX then
-                Const.colors.red
-            else
-                Const.colors.blue
-    in
     el
-        [ Element.alignTop
-        , Background.color playerColor
-        , Element.padding Const.ui.spacing.small
-        , Font.center
-        , width (Element.maximum 200 fill)
-        , if disabled then
-            Element.alpha 0.3
-          else
-            Element.alpha 1.0
-        ]
+        (Element.alignTop :: width (Element.maximum 200 fill) :: style (Style.PlayerScore player <| not disabled))
         (text <| title ++ ": " ++ String.fromInt points)

@@ -8,25 +8,18 @@ import Data.Board as Board exposing (..)
 import Data.Move as Move exposing (Move, Positioned, Positioned3D)
 import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
 import Element.Input as Input
 import Html
 import Html.Attributes
 import List.Extra as List
+import View.Style as Style exposing (style)
 
 
 singleBoard : Board a -> List (Element msg) -> Element msg
 singleBoard board tiles =
     List.groupsOf (Board.size board) tiles
         |> List.map (Element.row [ Element.centerX, Element.spacing Const.ui.spacing.xxSmall ])
-        |> Element.column [ Element.centerY, skew 35, Element.spacing Const.ui.spacing.xxSmall ]
-
-
-skew : Int -> Attribute msg
-skew degrees =
-    Element.htmlAttribute <| Html.Attributes.style "transform" ("skew(" ++ String.fromInt degrees ++ "deg)")
+        |> Element.column (Element.centerY :: Element.spacing Const.ui.spacing.xxSmall :: style Style.Board)
 
 
 render3D : (Positioned3D {} -> msg) -> Board Cubic -> Element msg
@@ -46,12 +39,7 @@ render3D tagger board =
     in
     List.range 0 (Board.size board - 1)
         |> List.map renderNthBoard
-        |> Element.column
-            [ width fill
-            , height fill
-            , Element.spacing Const.ui.spacing.normal
-            , Element.rotate <| degrees -20
-            ]
+        |> Element.column (width fill :: height fill :: style Style.BoardCube)
 
 
 render2D : (Positioned {} -> msg) -> Board Flat -> Element msg
@@ -79,25 +67,12 @@ maybeIf b v =
 move : Bool -> (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Element msg
 move enabled emptyTagger m =
     let
-        playerColor player =
-            if player == PlayerX then
-                Const.colors.red
-            else
-                Const.colors.blue
-
-        tileColor =
-            Maybe.map playerColor m.player |> Maybe.withDefault Const.colors.lightGray
-
         size =
             50
 
         button msg =
             Input.button
-                [ width <| Element.px size
-                , height <| Element.px size
-                , Background.color tileColor
-                , Border.color <| Element.rgba 1 1 1 0
-                ]
+                (style <| Style.BoardTile m.player)
                 { label = Element.none
                 , onPress = maybeIf enabled msg
                 }
