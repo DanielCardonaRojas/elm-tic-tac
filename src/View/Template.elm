@@ -4,7 +4,7 @@ import Constants as Const
 import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
 import Element.Font as Font
-import View.Style as Style exposing (style)
+import Style.Rules as Style exposing (style)
 
 
 primary : Element msg -> Element msg

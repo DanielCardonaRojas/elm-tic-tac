@@ -1,4 +1,11 @@
-module View.Style exposing (Styles(..), style)
+module Style.Rules
+    exposing
+        ( ColorStyle(..)
+        , ElementStyle(..)
+        , Styles(..)
+        , element
+        , style
+        )
 
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
@@ -7,12 +14,15 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Html.Attributes
+import Style.Process as Style exposing (Styler)
+
+
+-- Top level styling rules
 
 
 type Styles
     = Setup
     | SetupButton
-    | Button
     | PlayerScore Player Bool -- Player and isCurrentPlayer flag.
     | PlayerButton Player
     | Game
@@ -24,27 +34,119 @@ type Styles
     | BoardTile (Maybe Player)
 
 
+
+-- Reusable styling rules
+
+
+type ElementStyle
+    = Title
+    | Subtitle
+    | Paragragh
+    | Button
+    | Pane
+    | Textfield
+
+
+type ColorStyle
+    = Background
+    | PlayerBackground Player
+    | Primary
+    | Secondary
+
+
+type Spacing
+    = Small
+    | Normal
+    | Large
+
+
+type Edge
+    = Left
+    | Right
+    | Top
+    | Bottom
+
+
+length : Spacing -> Int
+length s =
+    case s of
+        Small ->
+            Const.ui.spacing.small
+
+        Normal ->
+            Const.ui.spacing.normal
+
+        Large ->
+            Const.ui.spacing.large
+
+
+paddingEach : Edge -> Spacing -> Attribute msg
+paddingEach e s =
+    let
+        edges =
+            { top = 0, right = 0, bottom = 0, left = 0 }
+    in
+    case e of
+        Top ->
+            { edges | top = length s } |> Element.paddingEach
+
+        Bottom ->
+            { edges | bottom = length s } |> Element.paddingEach
+
+        Right ->
+            { edges | right = length s } |> Element.paddingEach
+
+        Left ->
+            { edges | left = length s } |> Element.paddingEach
+
+
+paddingXY : Spacing -> Spacing -> Attribute msg
+paddingXY s1 s2 =
+    Element.paddingXY (length s1) (length s2)
+
+
+padding : Spacing -> Attribute msg
+padding s =
+    paddingXY s s
+
+
+spacing : Spacing -> Attribute msg
+spacing s =
+    length s
+        |> Element.spacing
+
+
+
+-- Sub Stylers: Breaks up styling into more atomic substyler.
+
+
+element : Styler ElementStyle msg
+element e =
+    case e of
+        Button ->
+            [ Element.padding Const.ui.spacing.small
+            ]
+
+        _ ->
+            []
+
+
 style : Styles -> List (Attribute msg)
 style st =
     case st of
         -- Setup screens styles
         Setup ->
             [ Background.color Const.ui.themeColor.paneBackground
-            , Element.spacing Const.ui.spacing.small
-            , Element.paddingXY Const.ui.spacing.small Const.ui.spacing.normal
+            , spacing Small
+            , paddingXY Small Normal
             , Font.color Const.colors.gray
             , Border.rounded 10
             , Element.centerX
             ]
 
         SetupButton ->
-            [ Element.padding Const.ui.spacing.small
-            , Background.color <| Const.ui.themeColor.paneButtonBackground
-            ]
-
-        Button ->
-            [ Element.padding Const.ui.spacing.small
-            ]
+            Style.with element [ Button ]
+                |> Style.adding (Background.color <| Const.ui.themeColor.paneButtonBackground)
 
         -- Board Styles
         Board ->
@@ -64,16 +166,15 @@ style st =
             ]
 
         PlayerScore player enabled ->
-            [ Element.padding Const.ui.spacing.small
+            [ padding Small
             , Font.center
             , Background.color <| playerColor player
             , when enabled (Element.alpha 1.0) (Element.alpha 0.3)
             ]
 
         PlayerButton player ->
-            [ Element.padding Const.ui.spacing.small
-            , Background.color <| playerColor player
-            ]
+            Style.with element [ Button ]
+                |> Style.adding (Background.color <| playerColor player)
 
         Game ->
             []
@@ -86,13 +187,13 @@ style st =
 
         TemplateFooter ->
             [ Background.color Const.colors.lightGray
-            , Element.padding Const.ui.spacing.small
+            , padding Small
             , Font.size Const.ui.fontSize.small
             , Font.center
             ]
 
         TemplateTitle ->
-            [ Element.padding Const.ui.spacing.small
+            [ padding Small
             , Font.color Const.ui.themeColor.accentBackground
             , Font.size Const.ui.fontSize.large
             ]

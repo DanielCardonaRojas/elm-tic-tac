@@ -13,7 +13,7 @@ import Html.Events
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
-import View.Style as Style exposing (style)
+import Style.Rules as Style exposing (style)
 
 
 maybeIf : Bool -> a -> Maybe a
