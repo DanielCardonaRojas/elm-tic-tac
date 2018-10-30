@@ -34,7 +34,7 @@ connection enabled room =
                 , onPress = maybeIf enabled msg
                 }
     in
-    Element.column (style Style.Setup)
+    Element.column (Element.centerX :: style Style.Setup)
         [ Input.text []
             { onChange = String.trim >> String.toLower >> RoomSetup
             , placeholder = maybeIf enabled (Input.placeholder [] <| text "Enter room name")
