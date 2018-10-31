@@ -6,15 +6,16 @@ import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Input as Input
 import Msg exposing (Msg(..))
+import Style.Process as Style
+import Style.Rules as Style exposing (element, style)
 import View.Board as Board
-import View.Style as Style exposing (style)
 
 
 render : List (Attribute Msg) -> Game -> Player -> Element Msg
 render attributes game player =
     let
         button txt msg =
-            Input.button (Element.centerX :: style Style.Button)
+            Input.button (Element.centerX :: Style.with element [ Style.Button ])
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = Just msg
                 }

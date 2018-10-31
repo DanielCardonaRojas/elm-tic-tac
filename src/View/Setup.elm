@@ -1,8 +1,8 @@
-module View.Setup exposing (connection, playerPicker)
+module View.Setup exposing (connection, playerPicker, roomInfo)
 
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
-import Element exposing (Element, el, fill, height, text, width)
+import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -13,7 +13,8 @@ import Html.Events
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
-import View.Style as Style exposing (style)
+import Style.Process as Style
+import Style.Rules as Style exposing (style)
 
 
 maybeIf : Bool -> a -> Maybe a
@@ -34,8 +35,8 @@ connection enabled room =
                 , onPress = maybeIf enabled msg
                 }
     in
-    Element.column (style Style.Setup)
-        [ Input.text []
+    Element.column (Element.centerX :: style Style.Setup)
+        [ Input.text (Style.asA Style.Textfield Style.element)
             { onChange = String.trim >> String.toLower >> RoomSetup
             , placeholder = maybeIf enabled (Input.placeholder [] <| text "Enter room name")
             , label = Input.labelAbove [ Font.size Const.ui.fontSize.medium ] <| text "Create a new match or join one"
@@ -69,3 +70,8 @@ playerPicker model =
         , segment Player.PlayerX
         , segment Player.PlayerO
         ]
+
+
+roomInfo : List (Attribute Msg) -> String -> Element Msg
+roomInfo attrs roomName =
+    el attrs <| text ("Connected to room: " ++ roomName)

@@ -21,20 +21,22 @@ view model =
 
 viewElement : Model -> Element Msg
 viewElement model =
+    let
+        roomInfo =
+            maybe (Setup.roomInfo [ Font.size Const.ui.fontSize.small, Element.alignRight ]) model.room
+    in
     case model.scene of
         MatchSetup str ->
             Element.column [ Element.centerX, Element.centerY ]
                 [ Setup.connection (model.room == Nothing) str
-                , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
                 ]
-                |> Template.primary
+                |> Template.withItems (el [ width fill ] <| text "") roomInfo
 
         PlayerChoose ->
             Element.column [ Element.centerX, Element.centerY ]
                 [ Setup.playerPicker model
-                , maybe (roomInfo [ Font.size Const.ui.fontSize.small ]) model.room
                 ]
-                |> Template.primary
+                |> Template.withItems (el [] Element.none) roomInfo
 
         GamePlay ->
             Element.column [ Element.centerX, Element.spaceEvenly, width fill, height fill ]
@@ -61,8 +63,3 @@ score model =
 
 maybe f =
     Maybe.map f >> Maybe.withDefault Element.none
-
-
-roomInfo : List (Attribute Msg) -> String -> Element Msg
-roomInfo attrs roomName =
-    el attrs <| text ("Connected to room: " ++ roomName)

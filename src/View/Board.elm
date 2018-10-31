@@ -12,7 +12,7 @@ import Element.Input as Input
 import Html
 import Html.Attributes
 import List.Extra as List
-import View.Style as Style exposing (style)
+import Style.Rules as Style exposing (style)
 
 
 singleBoard : Board a -> List (Element msg) -> Element msg

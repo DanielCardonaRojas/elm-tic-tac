@@ -1,4 +1,10 @@
-module View.Style exposing (Styles(..), style)
+module Style.Rules
+    exposing
+        ( ElementStyle(..)
+        , Styles(..)
+        , element
+        , style
+        )
 
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
@@ -7,15 +13,19 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Html.Attributes
+import Style.Process as Style exposing (Styler)
+import Style.Spacing as Spacing exposing (..)
+import Style.Theme as Theme
+
+
+-- Top level styling rules
 
 
 type Styles
     = Setup
     | SetupButton
-    | Button
     | PlayerScore Player Bool -- Player and isCurrentPlayer flag.
     | PlayerButton Player
-    | Game
     | Board
     | BoardCube
     | Template
@@ -24,27 +34,67 @@ type Styles
     | BoardTile (Maybe Player)
 
 
+
+-- Reusable styling rules
+
+
+type ElementStyle
+    = Title
+    | Subtitle
+    | Paragragh
+    | Button
+    | Panel
+    | Section
+    | Label
+    | Textfield
+
+
+
+-- Sub Stylers: Breaks up styling into more atomic substyler.
+
+
+element : Styler ElementStyle msg
+element e =
+    case e of
+        Button ->
+            [ padding Small
+            , Border.rounded 5
+            ]
+
+        Panel ->
+            [ spacing Small
+            , paddingXY Small Normal
+            , Border.rounded 10
+            ]
+
+        Section ->
+            [ paddingXY Normal Small
+            ]
+
+        Label ->
+            [ padding Small
+            ]
+
+        Textfield ->
+            [ Theme.on Theme.Primary
+            ]
+
+        _ ->
+            []
+
+
 style : Styles -> List (Attribute msg)
 style st =
     case st of
         -- Setup screens styles
         Setup ->
-            [ Background.color Const.ui.themeColor.paneBackground
-            , Element.spacing Const.ui.spacing.small
-            , Element.paddingXY Const.ui.spacing.small Const.ui.spacing.normal
-            , Font.color Const.colors.gray
-            , Border.rounded 10
-            , Element.centerX
-            ]
+            Style.asA Panel element
+                |> Style.combined (Theme.for Theme.Surface)
 
         SetupButton ->
-            [ Element.padding Const.ui.spacing.small
-            , Background.color <| Const.ui.themeColor.paneButtonBackground
-            ]
-
-        Button ->
-            [ Element.padding Const.ui.spacing.small
-            ]
+            Style.asA Button element
+                |> Style.adding (Background.color Const.colors.lightSalmon)
+                |> Style.adding (Theme.on Theme.Surface)
 
         -- Board Styles
         Board ->
@@ -52,7 +102,7 @@ style st =
             ]
 
         BoardCube ->
-            [ Element.spacing Const.ui.spacing.normal
+            [ spacing Normal
             , Element.rotate <| degrees -20
             ]
 
@@ -64,36 +114,30 @@ style st =
             ]
 
         PlayerScore player enabled ->
-            [ Element.padding Const.ui.spacing.small
-            , Font.center
-            , Background.color <| playerColor player
-            , when enabled (Element.alpha 1.0) (Element.alpha 0.3)
-            ]
+            Style.asA Label element
+                |> Style.adding Font.center
+                |> Style.adding (Background.color <| playerColor player)
+                |> Style.addingWhen (not enabled) (Element.alpha 0.3)
 
         PlayerButton player ->
-            [ Element.padding Const.ui.spacing.small
-            , Background.color <| playerColor player
-            ]
-
-        Game ->
-            []
+            Style.asA Button element
+                |> Style.adding (Background.color <| playerColor player)
 
         -- Template Styles
         Template ->
-            [ Background.color Const.ui.themeColor.background
+            [ Theme.color Theme.Background
             , Font.family [ Font.monospace ]
             ]
 
         TemplateFooter ->
             [ Background.color Const.colors.lightGray
-            , Element.padding Const.ui.spacing.small
+            , padding Small
             , Font.size Const.ui.fontSize.small
             , Font.center
             ]
 
         TemplateTitle ->
-            [ Element.padding Const.ui.spacing.small
-            , Font.color Const.ui.themeColor.accentBackground
+            [ Font.color Const.ui.themeColor.accentBackground
             , Font.size Const.ui.fontSize.large
             ]
 
@@ -112,11 +156,3 @@ playerColor player =
         Const.colors.red
     else
         Const.colors.blue
-
-
-when : Bool -> a -> a -> a
-when b left right =
-    if b then
-        left
-    else
-        right
