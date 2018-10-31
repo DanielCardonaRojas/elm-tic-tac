@@ -3,7 +3,7 @@ module Application exposing (main)
 import Basics.Extra exposing (..)
 import Browser
 import Browser.Dom as Dom
-import Data.Board as Board exposing (Board, Cubic, Flat)
+import Data.Board as Board exposing (Board)
 import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)

@@ -13,7 +13,7 @@ module Data.Game
 -- This module is a thin wrapper around Board module
 -- to help this be a little easiear to handle in the app
 
-import Data.Board as Board exposing (Board, Cubic, Flat, Spot)
+import Data.Board as Board exposing (Board, Cubic, Spot)
 import Data.Move as Move exposing (Move, Move3D, Positioned3D)
 import Data.Player as Player exposing (Player)
 import Maybe.Extra as Maybe

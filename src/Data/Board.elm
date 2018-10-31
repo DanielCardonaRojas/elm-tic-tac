@@ -3,25 +3,19 @@ module Data.Board
         ( Board
         , BoardIndex
         , Cubic
-        , Flat
         , Spot
-        , cubeDiagonals
         , cubic
         , cubicWin
         , decode
         , emptySpots
         , enabled
         , encode
-        , flat
-        , flatWin
         , lock
         , locked
         , moves
-        , play2D
         , play3D
         , size
         , spots
-        , tiles
         , tilesAt
         , toggleLock
         , unlock
@@ -41,10 +35,6 @@ import Maybe.Extra as Maybe
 
 type alias BoardIndex =
     Int
-
-
-type Flat
-    = Flat
 
 
 type Cubic
@@ -116,11 +106,6 @@ tilesAt k board =
     boardTiles (clamp 0 (size board - 1) k) <| board
 
 
-tiles : Board Flat -> List (Positioned { player : Maybe Player })
-tiles board =
-    boardTiles 0 board
-
-
 boardTiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
 boardTiles idx (Board board) =
     let
@@ -150,16 +135,6 @@ boardTiles idx (Board board) =
                     |> List.head
                     |> Maybe.withDefault p
             )
-
-
-flat : Int -> Board Flat
-flat n =
-    Board
-        { size = n
-        , cubic = True
-        , moves = []
-        , enabled = True
-        }
 
 
 cubic : Int -> Board Cubic
@@ -201,16 +176,6 @@ play idx move (Board board) =
 play3D : BoardIndex -> Move -> Board Cubic -> Board Cubic
 play3D =
     play
-
-
-play2D : Move -> Board Flat -> Board Flat
-play2D =
-    play 0
-
-
-flatWin : Board Flat -> Maybe (List Move3D)
-flatWin board =
-    won board
 
 
 cubicWin : Board Cubic -> Maybe (List Move3D)
