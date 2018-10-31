@@ -54,7 +54,7 @@ type Board a
         { size : Int -- this determines the board will be nxn
         , cubic : Bool -- We can determiner the amount of boards
         , moves : List Move3D
-        , enabled : Bool
+        , disabledBoards : List Int
         }
 
 
@@ -98,7 +98,7 @@ emptySpots board =
 
 locked : Board a -> Bool
 locked (Board board) =
-    .enabled board
+    List.length board.disabledBoards == board.size
 
 
 tilesAt : BoardIndex -> Board Cubic -> List (Positioned { player : Maybe Player })
@@ -143,34 +143,52 @@ cubic n =
         { size = n
         , cubic = True
         , moves = []
-        , enabled = True
+        , disabledBoards = []
         }
 
 
 lock : Board a -> Board a
 lock (Board board) =
-    Board { board | enabled = False }
+    Board { board | disabledBoards = List.range 0 (board.size - 1) }
+
+
+singleLock : BoardIndex -> Board a -> Board a
+singleLock idx (Board board) =
+    Board
+        { board | disabledBoards = [ clamp 0 (board.size - 1) idx ] }
 
 
 unlock : Board a -> Board a
 unlock (Board board) =
-    Board { board | enabled = True }
+    Board { board | disabledBoards = [] }
 
 
 enabled : Bool -> Board a -> Board a
-enabled bool (Board board) =
-    Board { board | enabled = bool }
+enabled bool board =
+    if bool then
+        unlock board
+    else
+        lock board
 
 
 toggleLock : Board a -> Board a
-toggleLock (Board board) =
-    Board { board | enabled = not board.enabled }
+toggleLock board =
+    if locked board then
+        unlock board
+    else
+        lock board
 
 
 play : BoardIndex -> Move -> Board a -> Board a
 play idx move (Board board) =
     Board
-        { board | moves = Move.fromMoveInBoard idx move :: board.moves }
+        { board
+            | moves =
+                if not <| locked (Board board) then
+                    Move.fromMoveInBoard idx move :: board.moves
+                else
+                    board.moves
+        }
 
 
 play3D : BoardIndex -> Move -> Board Cubic -> Board Cubic
