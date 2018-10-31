@@ -56,4 +56,5 @@ colors =
     , lightGray = rgb255 200 200 200
     , red = rgb255 255 133 133
     , blue = rgb255 127 255 211
+    , lightSalmon = rgb255 255 160 122
     }

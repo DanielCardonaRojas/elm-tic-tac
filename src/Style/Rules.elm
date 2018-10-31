@@ -26,7 +26,6 @@ type Styles
     | SetupButton
     | PlayerScore Player Bool -- Player and isCurrentPlayer flag.
     | PlayerButton Player
-    | Game
     | Board
     | BoardCube
     | Template
@@ -45,6 +44,7 @@ type ElementStyle
     | Paragragh
     | Button
     | Panel
+    | Section
     | Label
     | Textfield
 
@@ -58,6 +58,7 @@ element e =
     case e of
         Button ->
             [ padding Small
+            , Border.rounded 5
             ]
 
         Panel ->
@@ -66,8 +67,16 @@ element e =
             , Border.rounded 10
             ]
 
+        Section ->
+            [ paddingXY Normal Small
+            ]
+
         Label ->
             [ padding Small
+            ]
+
+        Textfield ->
+            [ Theme.on Theme.Primary
             ]
 
         _ ->
@@ -80,12 +89,12 @@ style st =
         -- Setup screens styles
         Setup ->
             Style.asA Panel element
-                |> Style.adding (Theme.color Theme.Background)
-                |> Style.adding (Theme.on Theme.Background)
+                |> Style.combined (Theme.for Theme.Surface)
 
         SetupButton ->
             Style.asA Button element
-                |> Style.adding (Theme.on Theme.Background)
+                |> Style.adding (Background.color Const.colors.lightSalmon)
+                |> Style.adding (Theme.on Theme.Surface)
 
         -- Board Styles
         Board ->
@@ -114,9 +123,6 @@ style st =
             Style.asA Button element
                 |> Style.adding (Background.color <| playerColor player)
 
-        Game ->
-            []
-
         -- Template Styles
         Template ->
             [ Theme.color Theme.Background
@@ -131,8 +137,7 @@ style st =
             ]
 
         TemplateTitle ->
-            [ padding Small
-            , Font.color Const.ui.themeColor.accentBackground
+            [ Font.color Const.ui.themeColor.accentBackground
             , Font.size Const.ui.fontSize.large
             ]
 
