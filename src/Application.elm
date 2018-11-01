@@ -64,7 +64,7 @@ update msg model =
             Return.singleton { model | scene = MatchSetup str }
 
         PlayAgain n ->
-            Return.singleton { model | game = Game.make n |> Game.switchTurn, player = model.opponent, opponent = model.player }
+            Return.singleton { model | game = Game.make n, player = model.opponent, opponent = model.player }
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
                 |> Return.effect_ (emitInRoom "rematch" <| Board.encode <| Board.cubic n)
 

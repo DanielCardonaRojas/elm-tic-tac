@@ -15,7 +15,10 @@ render : List (Attribute Msg) -> Game -> Player -> Element Msg
 render attributes game player =
     let
         button txt msg =
-            Input.button (Element.centerX :: Style.with element [ Style.Button ])
+            Input.button
+                (Style.asA (Style.Button True) element
+                    |> Style.adding Element.centerX
+                )
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = Just msg
                 }
