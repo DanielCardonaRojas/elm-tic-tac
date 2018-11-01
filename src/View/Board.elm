@@ -22,25 +22,25 @@ singleBoard board tiles =
         |> Element.column (Element.centerY :: Element.spacing Const.ui.spacing.xxSmall :: style Style.Board)
 
 
-render3D : (Positioned3D {} -> msg) -> Board Cubic -> Element msg
+render3D : (Positioned3D {} -> Maybe msg) -> Board Cubic -> Element msg
 render3D tagger board =
     List.range 0 (Board.size board - 1)
         |> List.map (renderNthBoard tagger board)
         |> Element.column (width fill :: height fill :: style Style.BoardCube)
 
 
-renderFlat : (Positioned3D {} -> msg) -> Board Cubic -> BoardIndex -> Element msg
+renderFlat : (Positioned3D {} -> Maybe msg) -> Board Cubic -> BoardIndex -> Element msg
 renderFlat tagger board selected =
     Element.column []
         [ renderNthBoard tagger board selected
         ]
 
 
-renderNthBoard : (Positioned3D {} -> msg) -> Board Cubic -> BoardIndex -> Element msg
+renderNthBoard : (Positioned3D {} -> Maybe msg) -> Board Cubic -> BoardIndex -> Element msg
 renderNthBoard tagger board n =
     let
         renderTile =
-            move (Board.locked board) tagger
+            move tagger
     in
     Board.tilesAt n board
         |> List.map (Move.from2D n)
@@ -56,8 +56,8 @@ maybeIf b v =
         Nothing
 
 
-move : Bool -> (Positioned3D {} -> msg) -> Positioned3D { player : Maybe Player } -> Element msg
-move enabled emptyTagger m =
+move : (Positioned3D {} -> Maybe msg) -> Positioned3D { player : Maybe Player } -> Element msg
+move emptyTagger m =
     let
         size =
             50
@@ -66,7 +66,7 @@ move enabled emptyTagger m =
             Input.button
                 (style <| Style.BoardTile m.player)
                 { label = Element.none
-                , onPress = maybeIf enabled msg
+                , onPress = msg
                 }
     in
     button <| emptyTagger (Move.positioned3D m)

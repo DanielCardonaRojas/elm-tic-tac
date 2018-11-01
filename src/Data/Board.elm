@@ -98,7 +98,7 @@ emptySpots board =
 
 locked : Board a -> Bool
 locked (Board board) =
-    List.length board.disabledBoards == board.size
+    List.length board.disabledBoards >= board.size
 
 
 tilesAt : BoardIndex -> Board Cubic -> List (Positioned { player : Maybe Player })

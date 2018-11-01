@@ -44,7 +44,10 @@ renderBoard : Game -> Player -> Element Msg
 renderBoard game nextPlayer =
     Board.render3D
         (\pos ->
-            Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
+            if game.turn == nextPlayer then
+                Just <| Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
+            else
+                Nothing
         )
         game.board
         |> el [ Element.centerX, Element.centerY ]

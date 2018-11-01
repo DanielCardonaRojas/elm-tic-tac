@@ -6,6 +6,7 @@ module Data.Game
         , lock
         , make
         , size
+        , switchTurn
         , unlock
         , update
         )
@@ -15,7 +16,7 @@ module Data.Game
 
 import Data.Board as Board exposing (Board, Cubic, Spot)
 import Data.Move as Move exposing (Move, Move3D, Positioned3D)
-import Data.Player as Player exposing (Player)
+import Data.Player as Player exposing (Player(..))
 import Maybe.Extra as Maybe
 
 
@@ -29,23 +30,36 @@ type alias Game =
     { board : Board Cubic
     , win : Maybe ( Player, List Spot )
     , status : Status
+    , turn : Player
     }
 
 
 make : Int -> Game
 make n =
-    { board = Board.lock <| Board.cubic n
+    { board = Board.cubic n
     , win = Nothing
     , status = Playing
+    , turn = PlayerX
     }
+
+
+switchTurn : Game -> Game
+switchTurn game =
+    { game | turn = game.turn |> Player.switch }
 
 
 update : Move -> Int -> Game -> Game
 update move idx game =
-    Board.play3D idx move game.board
-        |> (\board -> { game | board = board })
-        |> updateWin
-        |> updateStatus
+    if move.player == game.turn then
+        Board.play3D idx move game.board
+            |> (\b ->
+                    { game | board = b }
+               )
+            |> updateWin
+            |> updateStatus
+            |> switchTurn
+    else
+        game
 
 
 lock : Game -> Game

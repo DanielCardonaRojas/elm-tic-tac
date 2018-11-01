@@ -56,8 +56,8 @@ score model =
         , Element.spaceEvenly
         , width fill
         ]
-        [ maybe (\p -> Game.score (Tuple.first model.score) (model.turn /= p) "You" p) model.player
-        , maybe (\p -> Game.score (Tuple.second model.score) (model.turn /= p) "Opponent" p) model.opponent
+        [ maybe (\p -> Game.score (Tuple.first model.score) (model.game.turn /= p) "You" p) model.player
+        , maybe (\p -> Game.score (Tuple.second model.score) (model.game.turn /= p) "Opponent" p) model.opponent
         ]
 
 
