@@ -185,7 +185,8 @@ play idx move (Board board) =
         { board
             | moves =
                 if not <| locked (Board board) then
-                    Move.fromMoveInBoard idx move :: board.moves
+                    (Move.fromMoveInBoard idx move :: board.moves)
+                        |> List.uniqueBy Move.positioned3DTuple
                 else
                     board.moves
         }
