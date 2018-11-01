@@ -23,9 +23,9 @@ import Style.Theme as Theme
 
 type Styles
     = Setup
-    | SetupButton
+    | SetupButton Bool
     | PlayerScore Player Bool -- Player and isCurrentPlayer flag.
-    | PlayerButton Player
+    | PlayerButton Player Bool
     | Board
     | BoardCube
     | Template
@@ -42,7 +42,7 @@ type ElementStyle
     = Title
     | Subtitle
     | Paragragh
-    | Button
+    | Button Bool
     | Panel
     | Section
     | Label
@@ -56,10 +56,11 @@ type ElementStyle
 element : Styler ElementStyle msg
 element e =
     case e of
-        Button ->
+        Button enabled ->
             [ padding Small
             , Border.rounded 5
             ]
+                |> Style.addingWhen (not enabled) (Element.alpha 0.3)
 
         Panel ->
             [ spacing Small
@@ -91,8 +92,8 @@ style st =
             Style.asA Panel element
                 |> Style.combined (Theme.for Theme.Surface)
 
-        SetupButton ->
-            Style.asA Button element
+        SetupButton enabled ->
+            Style.asA (Button enabled) element
                 |> Style.adding (Background.color Const.colors.lightSalmon)
                 |> Style.adding (Theme.on Theme.Surface)
 
@@ -119,8 +120,8 @@ style st =
                 |> Style.adding (Background.color <| playerColor player)
                 |> Style.addingWhen (not enabled) (Element.alpha 0.3)
 
-        PlayerButton player ->
-            Style.asA Button element
+        PlayerButton player enabled ->
+            Style.asA (Button enabled) element
                 |> Style.adding (Background.color <| playerColor player)
 
         -- Template Styles

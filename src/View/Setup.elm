@@ -28,9 +28,9 @@ maybeIf b v =
 connection : Bool -> String -> Element Msg
 connection enabled room =
     let
-        button txt msg =
+        button txt msg clickable =
             Input.button
-                (Element.centerX :: width fill :: style Style.SetupButton)
+                (Element.centerX :: width fill :: (style <| Style.SetupButton clickable))
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = maybeIf enabled msg
                 }
@@ -42,8 +42,8 @@ connection enabled room =
             , label = Input.labelAbove [ Font.size Const.ui.fontSize.medium ] <| text "Create a new match or join one"
             , text = room
             }
-        , button "Create Game" <| CreateGame room
-        , button "Join" <| SelectRoom room
+        , button "Create Game" (CreateGame room) enabled
+        , button "Join" (SelectRoom room) enabled
         , el [ Element.centerX, Font.size Const.ui.fontSize.small ] <| text "Elm-Tic-Tac is a two player online 3D tic tac toe game"
         ]
 
@@ -60,7 +60,7 @@ playerPicker model =
 
         segment player =
             Input.button
-                (Element.centerX :: (style <| Style.PlayerButton player))
+                (Element.centerX :: (style <| Style.PlayerButton player (enabledFor player)))
                 { label = text <| "Player" ++ Player.toString player
                 , onPress = maybeIf (enabledFor player) (SetPlayer player)
                 }

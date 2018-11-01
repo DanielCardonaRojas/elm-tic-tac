@@ -83,6 +83,11 @@ positioned3D pos =
     }
 
 
+positioned3DTuple : Positioned3D a -> ( Int, Int, Int )
+positioned3DTuple pos =
+    ( pos.column, pos.row, pos.board )
+
+
 from2D : Int -> Positioned { player : m } -> Positioned3D { player : m }
 from2D n pos2D =
     { column = pos2D.column

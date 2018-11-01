@@ -15,7 +15,10 @@ render : List (Attribute Msg) -> Game -> Player -> Element Msg
 render attributes game player =
     let
         button txt msg =
-            Input.button (Element.centerX :: Style.with element [ Style.Button ])
+            Input.button
+                (Style.asA (Style.Button True) element
+                    |> Style.adding Element.centerX
+                )
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = Just msg
                 }
@@ -44,7 +47,10 @@ renderBoard : Game -> Player -> Element Msg
 renderBoard game nextPlayer =
     Board.render3D
         (\pos ->
-            Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
+            if game.turn == nextPlayer then
+                Just <| Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
+            else
+                Nothing
         )
         game.board
         |> el [ Element.centerX, Element.centerY ]

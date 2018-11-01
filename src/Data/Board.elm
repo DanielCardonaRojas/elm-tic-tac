@@ -3,25 +3,19 @@ module Data.Board
         ( Board
         , BoardIndex
         , Cubic
-        , Flat
         , Spot
-        , cubeDiagonals
         , cubic
         , cubicWin
         , decode
         , emptySpots
         , enabled
         , encode
-        , flat
-        , flatWin
         , lock
         , locked
         , moves
-        , play2D
         , play3D
         , size
         , spots
-        , tiles
         , tilesAt
         , toggleLock
         , unlock
@@ -43,10 +37,6 @@ type alias BoardIndex =
     Int
 
 
-type Flat
-    = Flat
-
-
 type Cubic
     = Cubic
 
@@ -64,7 +54,7 @@ type Board a
         { size : Int -- this determines the board will be nxn
         , cubic : Bool -- We can determiner the amount of boards
         , moves : List Move3D
-        , enabled : Bool
+        , disabledBoards : List Int
         }
 
 
@@ -108,17 +98,12 @@ emptySpots board =
 
 locked : Board a -> Bool
 locked (Board board) =
-    .enabled board
+    List.length board.disabledBoards >= board.size
 
 
 tilesAt : BoardIndex -> Board Cubic -> List (Positioned { player : Maybe Player })
 tilesAt k board =
     boardTiles (clamp 0 (size board - 1) k) <| board
-
-
-tiles : Board Flat -> List (Positioned { player : Maybe Player })
-tiles board =
-    boardTiles 0 board
 
 
 boardTiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
@@ -152,65 +137,64 @@ boardTiles idx (Board board) =
             )
 
 
-flat : Int -> Board Flat
-flat n =
-    Board
-        { size = n
-        , cubic = True
-        , moves = []
-        , enabled = True
-        }
-
-
 cubic : Int -> Board Cubic
 cubic n =
     Board
         { size = n
         , cubic = True
         , moves = []
-        , enabled = True
+        , disabledBoards = []
         }
 
 
 lock : Board a -> Board a
 lock (Board board) =
-    Board { board | enabled = False }
+    Board { board | disabledBoards = List.range 0 (board.size - 1) }
+
+
+singleLock : BoardIndex -> Board a -> Board a
+singleLock idx (Board board) =
+    Board
+        { board | disabledBoards = [ clamp 0 (board.size - 1) idx ] }
 
 
 unlock : Board a -> Board a
 unlock (Board board) =
-    Board { board | enabled = True }
+    Board { board | disabledBoards = [] }
 
 
 enabled : Bool -> Board a -> Board a
-enabled bool (Board board) =
-    Board { board | enabled = bool }
+enabled bool board =
+    if bool then
+        unlock board
+    else
+        lock board
 
 
 toggleLock : Board a -> Board a
-toggleLock (Board board) =
-    Board { board | enabled = not board.enabled }
+toggleLock board =
+    if locked board then
+        unlock board
+    else
+        lock board
 
 
 play : BoardIndex -> Move -> Board a -> Board a
 play idx move (Board board) =
     Board
-        { board | moves = Move.fromMoveInBoard idx move :: board.moves }
+        { board
+            | moves =
+                if not <| locked (Board board) then
+                    (Move.fromMoveInBoard idx move :: board.moves)
+                        |> List.uniqueBy Move.positioned3DTuple
+                else
+                    board.moves
+        }
 
 
 play3D : BoardIndex -> Move -> Board Cubic -> Board Cubic
 play3D =
     play
-
-
-play2D : Move -> Board Flat -> Board Flat
-play2D =
-    play 0
-
-
-flatWin : Board Flat -> Maybe (List Move3D)
-flatWin board =
-    won board
 
 
 cubicWin : Board Cubic -> Maybe (List Move3D)

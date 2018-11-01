@@ -13,7 +13,6 @@ type Scene
 
 type alias Model =
     { game : Game
-    , turn : Player -- The player next to move
     , player : Maybe Player -- The local player, assigned be websocket server.
     , opponent : Maybe Player
     , socketId : Maybe String
@@ -27,7 +26,6 @@ type alias Model =
 default : Model
 default =
     { game = Game.make 3
-    , turn = Player.PlayerX
     , player = Nothing
     , opponent = Nothing
     , socketId = Nothing

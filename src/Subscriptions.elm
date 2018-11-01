@@ -1,7 +1,7 @@
 module Subscriptions exposing (subscriptions)
 
 import Browser.Events
-import Data.Board as Board exposing (Board, Cubic, Flat)
+import Data.Board as Board exposing (Board)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
 import Json.Decode as Decode exposing (Decoder)

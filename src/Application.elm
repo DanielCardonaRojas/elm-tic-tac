@@ -3,7 +3,7 @@ module Application exposing (main)
 import Basics.Extra exposing (..)
 import Browser
 import Browser.Dom as Dom
-import Data.Board as Board exposing (Board, Cubic, Flat)
+import Data.Board as Board exposing (Board)
 import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
@@ -37,13 +37,11 @@ update msg model =
         NewGame n ->
             Return.singleton { model | game = Game.make n, player = model.opponent, opponent = model.player }
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
-                |> Return.map (\m -> { m | turn = Player.PlayerX })
 
         Opponent move idx ->
             Return.singleton model.game
-                |> Return.map (Game.update move idx)
-                |> Return.map Game.unlock
-                |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
+                |> Return.map (Game.unlock >> Game.update move idx)
+                |> Return.map (\g -> { model | game = g })
                 |> Return.map updateScoreFromGame
 
         SetOponent p ->
@@ -67,14 +65,13 @@ update msg model =
 
         PlayAgain n ->
             Return.singleton { model | game = Game.make n, player = model.opponent, opponent = model.player }
-                |> Return.map (\m -> { m | turn = Player.PlayerX })
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
                 |> Return.effect_ (emitInRoom "rematch" <| Board.encode <| Board.cubic n)
 
         Play move idx ->
             Return.singleton model.game
                 |> Return.map (Game.update move idx >> Game.lock)
-                |> Return.map (\g -> { model | game = g, turn = Player.switch model.turn })
+                |> Return.map (\g -> { model | game = g })
                 |> Return.map updateScoreFromGame
                 |> Return.effect_ (emitInRoom "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
 
@@ -82,7 +79,7 @@ update msg model =
         SetPlayer p ->
             Return.singleton { model | player = Just p }
                 |> Return.map (\m -> { m | scene = GamePlay })
-                |> Return.map (\m -> { m | game = Game.enable (p == model.turn) m.game })
+                |> Return.map (\m -> { m | game = Game.enable (p == model.game.turn) m.game })
                 |> Return.effect_ (emitInRoom "chosePlayer" <| Player.encode p)
 
         SetupReady ->
@@ -127,7 +124,7 @@ init =
 
 isCurrentPlayerTurn : Model -> Bool
 isCurrentPlayerTurn model =
-    Maybe.map (\p -> p == model.turn) model.player
+    Maybe.map (\p -> p == model.game.turn) model.player
         |> Maybe.withDefault False
 
 
