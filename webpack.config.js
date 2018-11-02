@@ -34,7 +34,8 @@ module.exports = function(env) {
             {
               loader: 'elm-webpack-loader',
               options: {
-                  debug: env ? env.development : false
+                  debug: env ? env.development : false,
+                  optimize: true
               }
             }
         ]
