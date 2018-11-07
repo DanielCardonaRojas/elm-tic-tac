@@ -14,7 +14,7 @@ module Data.Game
 -- This module is a thin wrapper around Board module
 -- to help this be a little easiear to handle in the app
 
-import Data.Board as Board exposing (Board, Cubic, Spot)
+import Data.Board as Board exposing (Board, Spot)
 import Data.Move as Move exposing (Move, Move3D, Positioned3D)
 import Data.Player as Player exposing (Player(..))
 import Maybe.Extra as Maybe
@@ -27,7 +27,7 @@ type Status
 
 
 type alias Game =
-    { board : Board Cubic
+    { board : Board
     , win : Maybe ( Player, List Spot )
     , status : Status
     , turn : Player
@@ -36,7 +36,7 @@ type alias Game =
 
 make : Int -> Game
 make n =
-    { board = Board.cubic n
+    { board = Board.make n
     , win = Nothing
     , status = Playing
     , turn = PlayerX
@@ -51,7 +51,7 @@ switchTurn game =
 update : Move -> Int -> Game -> Game
 update move idx game =
     if move.player == game.turn then
-        Board.play3D idx move game.board
+        Board.play idx move game.board
             |> (\b ->
                     { game | board = b }
                )
@@ -105,7 +105,7 @@ updateStatus game =
 
 updateWin : Game -> Game
 updateWin game =
-    Board.cubicWin game.board
+    Board.won game.board
         |> (\win -> { game | win = winning win })
 
 

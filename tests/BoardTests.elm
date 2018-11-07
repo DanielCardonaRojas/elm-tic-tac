@@ -17,9 +17,9 @@ testCantPlayOnBlockedBoard =
         \_ ->
             let
                 board =
-                    Board.cubic 3
+                    Board.make 3
                         |> Board.lock
-                        |> Board.play3D 0 { column = 1, row = 1, player = PlayerX }
+                        |> Board.play 0 { column = 1, row = 1, player = PlayerX }
             in
             Expect.equal True <| List.isEmpty (Board.moves board)
 
@@ -30,9 +30,9 @@ testCantPlayTile =
         \_ ->
             let
                 board =
-                    Board.cubic 3
-                        |> Board.play3D 0 { column = 1, row = 1, player = PlayerX }
-                        |> Board.play3D 0 { column = 1, row = 1, player = PlayerO }
+                    Board.make 3
+                        |> Board.play 0 { column = 1, row = 1, player = PlayerX }
+                        |> Board.play 0 { column = 1, row = 1, player = PlayerO }
             in
             Expect.equal 1 <| List.length (Board.moves board)
 

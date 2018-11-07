@@ -15,28 +15,28 @@ import List.Extra as List
 import Style.Rules as Style exposing (style)
 
 
-singleBoard : Board a -> List (Element msg) -> Element msg
+singleBoard : Board -> List (Element msg) -> Element msg
 singleBoard board tiles =
     List.groupsOf (Board.size board) tiles
         |> List.map (Element.row [ Element.centerX, Element.spacing Const.ui.spacing.xxSmall ])
         |> Element.column (Element.centerY :: Element.spacing Const.ui.spacing.xxSmall :: style Style.Board)
 
 
-render3D : (Positioned3D {} -> Maybe msg) -> Board Cubic -> Element msg
+render3D : (Positioned3D {} -> Maybe msg) -> Board -> Element msg
 render3D tagger board =
     List.range 0 (Board.size board - 1)
         |> List.map (renderNthBoard tagger board)
         |> Element.column (width fill :: height fill :: style Style.BoardCube)
 
 
-renderFlat : (Positioned3D {} -> Maybe msg) -> Board Cubic -> BoardIndex -> Element msg
+renderFlat : (Positioned3D {} -> Maybe msg) -> Board -> BoardIndex -> Element msg
 renderFlat tagger board selected =
     Element.column []
         [ renderNthBoard tagger board selected
         ]
 
 
-renderNthBoard : (Positioned3D {} -> Maybe msg) -> Board Cubic -> BoardIndex -> Element msg
+renderNthBoard : (Positioned3D {} -> Maybe msg) -> Board -> BoardIndex -> Element msg
 renderNthBoard tagger board n =
     let
         renderTile =

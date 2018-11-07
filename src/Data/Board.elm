@@ -2,23 +2,22 @@ module Data.Board
     exposing
         ( Board
         , BoardIndex
-        , Cubic
         , Spot
-        , cubic
-        , cubicWin
         , decode
         , emptySpots
         , enabled
         , encode
         , lock
         , locked
+        , make
         , moves
-        , play3D
+        , play
         , size
         , spots
         , tilesAt
         , toggleLock
         , unlock
+        , won
         )
 
 import Data.Move as Move exposing (Move, Move3D, Positioned, Positioned3D)
@@ -37,10 +36,6 @@ type alias BoardIndex =
     Int
 
 
-type Cubic
-    = Cubic
-
-
 type alias Spot =
     Positioned3D {}
 
@@ -49,64 +44,58 @@ type alias Spots =
     List Spot
 
 
-type Board a
+type Board
     = Board
         { size : Int -- this determines the board will be nxn
-        , cubic : Bool -- We can determiner the amount of boards
         , moves : List Move3D
         , disabledBoards : List Int
         }
 
 
-encode : Board a -> Encode.Value
+encode : Board -> Encode.Value
 encode (Board board) =
     Encode.object
         [ ( "size", Encode.int board.size )
-        , ( "cubic", Encode.bool board.cubic )
         ]
 
 
-decode : Decoder { size : Int, cubic : Bool }
+decode : Decoder { size : Int }
 decode =
-    Decode.succeed (\s c -> { size = s, cubic = c })
+    Decode.succeed (\s -> { size = s })
         |> required "size" Decode.int
-        |> required "cubic" Decode.bool
 
 
-moves : Board a -> List Move3D
+moves : Board -> List Move3D
 moves (Board board) =
     .moves board
 
 
-size : Board a -> Int
+size : Board -> Int
 size (Board board) =
     .size board
 
 
-spots : Board a -> Int
+spots : Board -> Int
 spots (Board board) =
-    if board.cubic then
-        board.size ^ 3
-    else
-        board.size ^ 2
+    board.size ^ 3
 
 
-emptySpots : Board a -> Int
+emptySpots : Board -> Int
 emptySpots board =
     spots board - List.length (moves board)
 
 
-locked : Board a -> Bool
+locked : Board -> Bool
 locked (Board board) =
     List.length board.disabledBoards >= board.size
 
 
-tilesAt : BoardIndex -> Board Cubic -> List (Positioned { player : Maybe Player })
+tilesAt : BoardIndex -> Board -> List (Positioned { player : Maybe Player })
 tilesAt k board =
     boardTiles (clamp 0 (size board - 1) k) <| board
 
 
-boardTiles : BoardIndex -> Board a -> List (Positioned { player : Maybe Player })
+boardTiles : BoardIndex -> Board -> List (Positioned { player : Maybe Player })
 boardTiles idx (Board board) =
     let
         movesOnBoard =
@@ -137,33 +126,32 @@ boardTiles idx (Board board) =
             )
 
 
-cubic : Int -> Board Cubic
-cubic n =
+make : Int -> Board
+make n =
     Board
         { size = n
-        , cubic = True
         , moves = []
         , disabledBoards = []
         }
 
 
-lock : Board a -> Board a
+lock : Board -> Board
 lock (Board board) =
     Board { board | disabledBoards = List.range 0 (board.size - 1) }
 
 
-singleLock : BoardIndex -> Board a -> Board a
+singleLock : BoardIndex -> Board -> Board
 singleLock idx (Board board) =
     Board
         { board | disabledBoards = [ clamp 0 (board.size - 1) idx ] }
 
 
-unlock : Board a -> Board a
+unlock : Board -> Board
 unlock (Board board) =
     Board { board | disabledBoards = [] }
 
 
-enabled : Bool -> Board a -> Board a
+enabled : Bool -> Board -> Board
 enabled bool board =
     if bool then
         unlock board
@@ -171,7 +159,7 @@ enabled bool board =
         lock board
 
 
-toggleLock : Board a -> Board a
+toggleLock : Board -> Board
 toggleLock board =
     if locked board then
         unlock board
@@ -179,7 +167,7 @@ toggleLock board =
         lock board
 
 
-play : BoardIndex -> Move -> Board a -> Board a
+play : BoardIndex -> Move -> Board -> Board
 play idx move (Board board) =
     Board
         { board
@@ -192,29 +180,19 @@ play idx move (Board board) =
         }
 
 
-play3D : BoardIndex -> Move -> Board Cubic -> Board Cubic
-play3D =
-    play
-
-
-cubicWin : Board Cubic -> Maybe (List Move3D)
-cubicWin board =
-    won board
-
-
 
 -- Internal
 -- Obtain a projection through a plane in cube
 
 
-verticalColumnBoard : Board Cubic -> Int -> List Move
+verticalColumnBoard : Board -> Int -> List Move
 verticalColumnBoard (Board board) k =
     board.moves
         |> List.filter (\m -> m.column == k)
         |> List.map alongColumn
 
 
-verticalRowBoard : Board Cubic -> Int -> List Move
+verticalRowBoard : Board -> Int -> List Move
 verticalRowBoard (Board board) k =
     board.moves
         |> List.filter (\m -> m.row == k)
@@ -249,7 +227,7 @@ fromVerticalRowBoard k boardMoves =
     List.map undoProjection boardMoves
 
 
-horizontalBoard : Board Cubic -> Int -> List Move
+horizontalBoard : Board -> Int -> List Move
 horizontalBoard (Board board) k =
     board.moves
         |> List.filter (\m -> m.board == k)
@@ -272,7 +250,7 @@ alongRow pos =
     }
 
 
-won : Board a -> Maybe (List Move3D)
+won : Board -> Maybe (List Move3D)
 won (Board board) =
     let
         filterNonEmpty ls =
@@ -330,18 +308,13 @@ won (Board board) =
                 |> Maybe.filter (\mvs -> List.length mvs == board.size)
                 |> Maybe.filter (\mvs -> samePlayer mvs)
     in
-    case board.cubic of
-        True ->
-            winOnVerticalColumnBoard
-                |> Maybe.or winOnVerticalRowBoard
-                |> Maybe.or winOnHorizontalBoard
-                |> Maybe.or (onDiagonal <| diagonals.d1)
-                |> Maybe.or (onDiagonal <| diagonals.d2)
-                |> Maybe.or (onDiagonal <| diagonals.d3)
-                |> Maybe.or (onDiagonal <| diagonals.d4)
-
-        False ->
-            Nothing
+    winOnVerticalColumnBoard
+        |> Maybe.or winOnVerticalRowBoard
+        |> Maybe.or winOnHorizontalBoard
+        |> Maybe.or (onDiagonal <| diagonals.d1)
+        |> Maybe.or (onDiagonal <| diagonals.d2)
+        |> Maybe.or (onDiagonal <| diagonals.d3)
+        |> Maybe.or (onDiagonal <| diagonals.d4)
 
 
 
