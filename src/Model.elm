@@ -2,6 +2,10 @@ module Model exposing (..)
 
 import Data.Game as Game exposing (Game)
 import Data.Player as Player exposing (Player)
+import Element
+import Msg exposing (Msg(..))
+import Style.Process as Style exposing (Styler)
+import Style.Rules as Style exposing (Rules)
 
 
 type Scene
@@ -21,6 +25,16 @@ type alias Model =
     , scene : Scene
     , windowSize : ( Int, Int )
     }
+
+
+styler : Model -> Styler Rules Msg
+styler model =
+    Element.classifyDevice
+        { height = model.windowSize |> Tuple.first
+        , width = model.windowSize |> Tuple.second
+        }
+        |> Just
+        |> Style.styled
 
 
 default : Model

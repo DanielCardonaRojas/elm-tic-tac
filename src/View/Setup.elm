@@ -14,7 +14,7 @@ import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
 import Style.Process as Style
-import Style.Rules as Style exposing (style)
+import Style.Rules as Rules exposing (style)
 
 
 maybeIf : Bool -> a -> Maybe a
@@ -30,13 +30,13 @@ connection enabled room =
     let
         button txt msg clickable =
             Input.button
-                (Element.centerX :: width fill :: (style <| Style.SetupButton clickable))
+                (Element.centerX :: width fill :: (style <| Rules.SetupButton clickable))
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = maybeIf enabled msg
                 }
     in
-    Element.column (Element.centerX :: style Style.Setup)
-        [ Input.text (Style.asA Style.Textfield Style.element)
+    Element.column (Element.centerX :: style Rules.Setup)
+        [ Input.text (style Rules.Textfield)
             { onChange = String.trim >> String.toLower >> RoomSetup
             , placeholder = maybeIf enabled (Input.placeholder [] <| text "Enter room name")
             , label = Input.labelAbove [ Font.size Const.ui.fontSize.medium ] <| text "Create a new match or join one"
@@ -60,12 +60,15 @@ playerPicker model =
 
         segment player =
             Input.button
-                (Element.centerX :: (style <| Style.PlayerButton player (enabledFor player)))
+                (Element.centerX :: (Model.styler model <| Rules.PlayerButton player (enabledFor player)))
                 { label = text <| "Player" ++ Player.toString player
                 , onPress = maybeIf (enabledFor player) (SetPlayer player)
                 }
+
+        styles =
+            Model.styler model Rules.Setup
     in
-    Element.column (width (Element.fill |> Element.minimum 300) :: style Style.Setup)
+    Element.column (width (Element.fill |> Element.minimum 300) :: styles)
         [ el [ Element.centerX ] <| text "Choose a player"
         , segment Player.PlayerX
         , segment Player.PlayerO

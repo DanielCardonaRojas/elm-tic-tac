@@ -7,7 +7,7 @@ import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Input as Input
 import Msg exposing (Msg(..))
 import Style.Process as Style
-import Style.Rules as Style exposing (element, style)
+import Style.Rules as Rules exposing (style)
 import View.Board as Board
 
 
@@ -16,7 +16,7 @@ render attributes game player =
     let
         button txt msg =
             Input.button
-                (Style.asA (Style.Button True) element
+                (style (Rules.Button True)
                     |> Style.adding Element.centerX
                 )
                 { label = el [ Element.centerX ] <| text txt
@@ -59,5 +59,5 @@ renderBoard game nextPlayer =
 score : Int -> Bool -> String -> Player -> Element msg
 score points disabled title player =
     el
-        (Element.alignTop :: width (Element.maximum 200 fill) :: style (Style.PlayerScore player <| not disabled))
+        (Element.alignTop :: width (Element.maximum 200 fill) :: style (Rules.PlayerScore player <| not disabled))
         (text <| title ++ ": " ++ String.fromInt points)
