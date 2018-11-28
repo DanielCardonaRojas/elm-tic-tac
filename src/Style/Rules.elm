@@ -1,9 +1,8 @@
-module Style.Rules
-    exposing
-        ( Rules(..)
-        , style
-        , styled
-        )
+module Style.Rules exposing
+    ( Rules(..)
+    , style
+    , styled
+    )
 
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
@@ -15,6 +14,7 @@ import Html.Attributes
 import Style.Process as Style exposing (Styler)
 import Style.Spacing as Spacing exposing (..)
 import Style.Theme as Theme
+
 
 
 -- Top level styling rules
@@ -149,5 +149,6 @@ skew degrees =
 playerColor player =
     if player == PlayerX then
         Const.colors.red
+
     else
         Const.colors.blue

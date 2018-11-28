@@ -1,15 +1,14 @@
-module Data.Game
-    exposing
-        ( Game
-        , Status(..)
-        , enable
-        , lock
-        , make
-        , size
-        , switchTurn
-        , unlock
-        , update
-        )
+module Data.Game exposing
+    ( Game
+    , Status(..)
+    , enable
+    , lock
+    , make
+    , size
+    , switchTurn
+    , unlock
+    , update
+    )
 
 -- This module is a thin wrapper around Board module
 -- to help this be a little easiear to handle in the app
@@ -58,6 +57,7 @@ update move idx game =
             |> updateWin
             |> updateStatus
             |> switchTurn
+
     else
         game
 

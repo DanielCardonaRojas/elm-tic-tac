@@ -1,4 +1,4 @@
-module Msg exposing (..)
+module Msg exposing (Msg(..))
 
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)

@@ -1,4 +1,4 @@
-module Style.Process exposing (..)
+module Style.Process exposing (Styler, adding, addingWhen, asA, combined, when, with)
 
 import Element exposing (Attribute, Element)
 
@@ -31,6 +31,7 @@ addingWhen : Bool -> Attribute msg -> List (Attribute msg) -> List (Attribute ms
 addingWhen b attr ls =
     if b then
         ls ++ [ attr ]
+
     else
         ls
 
@@ -39,5 +40,6 @@ when : Bool -> Attribute msg -> Attribute msg -> Attribute msg
 when b left right =
     if b then
         left
+
     else
         right

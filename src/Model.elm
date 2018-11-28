@@ -1,4 +1,4 @@
-module Model exposing (..)
+module Model exposing (Model, Scene(..), default, styler)
 
 import Data.Game as Game exposing (Game)
 import Data.Player as Player exposing (Player)

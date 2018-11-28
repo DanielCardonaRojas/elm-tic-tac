@@ -1,24 +1,23 @@
-module Data.Board
-    exposing
-        ( Board
-        , BoardIndex
-        , Spot
-        , decode
-        , emptySpots
-        , enabled
-        , encode
-        , lock
-        , locked
-        , make
-        , moves
-        , play
-        , size
-        , spots
-        , tilesAt
-        , toggleLock
-        , unlock
-        , won
-        )
+module Data.Board exposing
+    ( Board
+    , BoardIndex
+    , Spot
+    , decode
+    , emptySpots
+    , enabled
+    , encode
+    , lock
+    , locked
+    , make
+    , moves
+    , play
+    , size
+    , spots
+    , tilesAt
+    , toggleLock
+    , unlock
+    , won
+    )
 
 import Data.Move as Move exposing (Move, Move3D, Positioned, Positioned3D)
 import Data.Player as Player exposing (Player)
@@ -27,6 +26,7 @@ import Json.Decode.Pipeline as Pipeline exposing (required)
 import Json.Encode as Encode exposing (Value)
 import List.Extra as List
 import Maybe.Extra as Maybe
+
 
 
 -- This module does calculations on moves but does not dictate the game play itself
@@ -155,6 +155,7 @@ enabled : Bool -> Board -> Board
 enabled bool board =
     if bool then
         unlock board
+
     else
         lock board
 
@@ -163,6 +164,7 @@ toggleLock : Board -> Board
 toggleLock board =
     if locked board then
         unlock board
+
     else
         lock board
 
@@ -175,6 +177,7 @@ play idx move (Board board) =
                 if not <| locked (Board board) then
                     (Move.fromMoveInBoard idx move :: board.moves)
                         |> List.uniqueBy Move.positioned3DTuple
+
                 else
                     board.moves
         }
@@ -301,6 +304,7 @@ won (Board board) =
                     (\m ->
                         if List.member (Move.positioned3D m) d then
                             Just m
+
                         else
                             Nothing
                     )

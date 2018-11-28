@@ -140,6 +140,7 @@ updateScore : Player -> Player -> ( Int, Int ) -> ( Int, Int )
 updateScore currentPlayer player ( playerScore, opponentScore ) =
     if currentPlayer == player then
         ( playerScore + 1, opponentScore )
+
     else
         ( playerScore, opponentScore + 1 )
 

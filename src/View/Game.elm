@@ -49,6 +49,7 @@ renderBoard game nextPlayer =
         (\pos ->
             if game.turn == nextPlayer then
                 Just <| Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
+
             else
                 Nothing
         )

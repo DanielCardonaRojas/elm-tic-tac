@@ -4,6 +4,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+
 ------------- COMMANDS  -----------------
 -- Connect to socketio server with url
 

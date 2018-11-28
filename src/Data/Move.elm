@@ -1,4 +1,4 @@
-module Data.Move exposing (..)
+module Data.Move exposing (Move, Move3D, Positioned, Positioned3D, as2D, decode, decode3D, encode, encode3D, equallyPositioned, from2D, fromMoveInBoard, positioned, positioned3D, positioned3DTuple)
 
 import Data.Player as Player exposing (Player)
 import Json.Decode as Decode exposing (Decoder)

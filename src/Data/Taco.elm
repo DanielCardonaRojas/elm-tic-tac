@@ -1,4 +1,4 @@
-module Data.Taco exposing (..)
+module Data.Taco exposing (Taco)
 
 import Data.Game as Game exposing (Game)
 import Data.Player as Player exposing (Player)

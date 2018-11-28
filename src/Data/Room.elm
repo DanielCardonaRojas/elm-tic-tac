@@ -1,4 +1,4 @@
-module Data.Room exposing (..)
+module Data.Room exposing (Room, encode, encode_, name)
 
 import Json.Encode as Encode exposing (Value)
 

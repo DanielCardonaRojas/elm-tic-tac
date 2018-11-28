@@ -1,4 +1,4 @@
-module Style.Spacing exposing (..)
+module Style.Spacing exposing (Edge(..), Spacing(..), length, padding, paddingEach, paddingXY, spacing)
 
 import Constants as Const
 import Element exposing (Attribute, Element)

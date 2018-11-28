@@ -1,4 +1,4 @@
-module BoardTests exposing (..)
+module BoardTests exposing (testCantPlayConsecutiveTimes, testCantPlayOnBlockedBoard, testCantPlayTile)
 
 import Data.Board as Board
 import Data.Game as Game
@@ -6,6 +6,7 @@ import Data.Player as Player exposing (Player(..))
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
+
 
 
 -- Board Test

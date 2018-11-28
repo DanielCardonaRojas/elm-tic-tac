@@ -21,6 +21,7 @@ maybeIf : Bool -> a -> Maybe a
 maybeIf b v =
     if b then
         Just v
+
     else
         Nothing
 

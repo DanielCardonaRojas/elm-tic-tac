@@ -1,4 +1,4 @@
-module Data.Player exposing (..)
+module Data.Player exposing (Player(..), decode, encode, fromString, switch, toString)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
