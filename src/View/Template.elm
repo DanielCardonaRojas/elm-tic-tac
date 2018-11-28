@@ -5,7 +5,7 @@ import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
 import Element.Font as Font
 import Style.Process as Style
-import Style.Rules as Style exposing (style)
+import Style.Rules as Rules exposing (style)
 
 
 primary : Element msg -> Element msg
@@ -18,12 +18,12 @@ withItems topLeft topRight content =
     let
         header =
             Element.row
-                (Style.asA Style.Section Style.element
+                (style Rules.Section
                     |> Style.adding (width fill)
                     |> Style.adding Element.spaceEvenly
                 )
                 [ el [ Element.alignLeft, width fill ] topLeft
-                , el (width fill :: Element.centerX :: Font.center :: style Style.TemplateTitle) <| text "Elm-Tic-Tac"
+                , el (width fill :: Element.centerX :: Font.center :: style Rules.TemplateTitle) <| text "Elm-Tic-Tac"
                 , el [ Element.alignRight, width fill ] topRight
                 ]
 
@@ -38,7 +38,7 @@ withItems topLeft topRight content =
                 content
     in
     Element.column
-        (height fill :: width fill :: Element.spaceEvenly :: style Style.Template)
+        (height fill :: width fill :: Element.spaceEvenly :: style Rules.Template)
         [ header
         , main
         , footer
@@ -48,7 +48,7 @@ withItems topLeft topRight content =
 footer : Element msg
 footer =
     Element.column
-        (width fill :: style Style.TemplateFooter)
+        (width fill :: style Rules.TemplateFooter)
         [ Element.paragraph [ Element.centerX ]
             [ text "The "
             , Element.newTabLink [ Font.underline ] { url = "https://github.com/DanielCardonaRojas/elm-tic-tac", label = text "code" }

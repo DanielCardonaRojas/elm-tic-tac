@@ -1,14 +1,13 @@
 module Style.Rules
     exposing
-        ( ElementStyle(..)
-        , Styles(..)
-        , element
+        ( Rules(..)
         , style
+        , styled
         )
 
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
-import Element exposing (Attribute, Element)
+import Element exposing (Attribute, Device, Element)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -21,8 +20,17 @@ import Style.Theme as Theme
 -- Top level styling rules
 
 
-type Styles
-    = Setup
+type Rules
+    = Title
+    | Subtitle
+    | Paragragh
+    | Button Bool
+    | Panel
+    | Section
+    | Label
+    | Textfield
+      -- Detailed
+    | Setup
     | SetupButton Bool
     | PlayerScore Player Bool -- Player and isCurrentPlayer flag.
     | PlayerButton Player Bool
@@ -34,28 +42,18 @@ type Styles
     | BoardTile (Maybe Player)
 
 
-
--- Reusable styling rules
-
-
-type ElementStyle
-    = Title
-    | Subtitle
-    | Paragragh
-    | Button Bool
-    | Panel
-    | Section
-    | Label
-    | Textfield
+style : Rules -> List (Attribute msg)
+style =
+    styled Nothing
 
 
 
--- Sub Stylers: Breaks up styling into more atomic substyler.
+--| Use recursion to reuse styles using Style.process functions.
 
 
-element : Styler ElementStyle msg
-element e =
-    case e of
+styled : Maybe Device -> Rules -> List (Attribute msg)
+styled device st =
+    case st of
         Button enabled ->
             [ padding Small
             , Border.rounded 5
@@ -80,20 +78,13 @@ element e =
             [ Theme.on Theme.Primary
             ]
 
-        _ ->
-            []
-
-
-style : Styles -> List (Attribute msg)
-style st =
-    case st of
         -- Setup screens styles
         Setup ->
-            Style.asA Panel element
+            Style.asA Panel (styled device)
                 |> Style.combined (Theme.for Theme.Surface)
 
         SetupButton enabled ->
-            Style.asA (Button enabled) element
+            Style.asA (Button enabled) (styled device)
                 |> Style.adding (Background.color Const.colors.lightSalmon)
                 |> Style.adding (Theme.on Theme.Surface)
 
@@ -115,13 +106,13 @@ style st =
             ]
 
         PlayerScore player enabled ->
-            Style.asA Label element
+            Style.asA Label (styled device)
                 |> Style.adding Font.center
                 |> Style.adding (Background.color <| playerColor player)
                 |> Style.addingWhen (not enabled) (Element.alpha 0.3)
 
         PlayerButton player enabled ->
-            Style.asA (Button enabled) element
+            Style.asA (Button enabled) (styled device)
                 |> Style.adding (Background.color <| playerColor player)
 
         -- Template Styles
@@ -141,6 +132,9 @@ style st =
             [ Font.color Const.ui.themeColor.accentBackground
             , Font.size Const.ui.fontSize.large
             ]
+
+        _ ->
+            []
 
 
 
