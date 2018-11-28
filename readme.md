@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/DanielCardonaRojas/elm-tic-tac.svg?branch=develop)](https://travis-ci.org/DanielCardonaRojas/elm-tic-tac)
+
 # Play
 
 Play online with a friend [here](https://elm-tic-tac.now.sh/)
