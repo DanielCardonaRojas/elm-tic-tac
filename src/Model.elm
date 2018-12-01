@@ -1,8 +1,8 @@
-module Model exposing (Model, Scene(..), default, styler)
+module Model exposing (Model, Scene(..), default, device, styler)
 
 import Data.Game as Game exposing (Game)
 import Data.Player as Player exposing (Player)
-import Element
+import Element exposing (Device)
 import Msg exposing (Msg(..))
 import Style.Process as Style exposing (Styler)
 import Style.Rules as Style exposing (Rules)
@@ -27,12 +27,18 @@ type alias Model =
     }
 
 
+device : Model -> Device
+device model =
+    Element.classifyDevice
+        { width = model.windowSize |> Tuple.first
+        , height = model.windowSize |> Tuple.second
+        }
+
+
 styler : Model -> Styler Rules Msg
 styler model =
-    Element.classifyDevice
-        { height = model.windowSize |> Tuple.first
-        , width = model.windowSize |> Tuple.second
-        }
+    device model
+        |> Debug.log "Device"
         |> Just
         |> Style.styled
 

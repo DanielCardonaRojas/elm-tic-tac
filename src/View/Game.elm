@@ -60,5 +60,5 @@ renderBoard game nextPlayer =
 score : Int -> Bool -> String -> Player -> Element msg
 score points disabled title player =
     el
-        (Element.alignTop :: width (Element.maximum 200 fill) :: style (Rules.PlayerScore player <| not disabled))
+        (Element.alignTop :: (width <| Element.maximum 300 fill) :: style (Rules.PlayerScore player <| not disabled))
         (text <| title ++ ": " ++ String.fromInt points)

@@ -6,13 +6,13 @@ module Style.Rules exposing
 
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
-import Element exposing (Attribute, Device, Element)
+import Element exposing (Attribute, Device, DeviceClass(..), Element)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Html.Attributes
 import Style.Process as Style exposing (Styler)
-import Style.Spacing as Spacing exposing (..)
+import Style.Size as Size exposing (..)
 import Style.Theme as Theme
 
 
@@ -29,6 +29,8 @@ type Rules
     | Section
     | Label
     | Textfield
+      -- Font
+    | SmallFont
       -- Detailed
     | Setup
     | SetupButton Bool
@@ -51,8 +53,13 @@ style =
 --| Use recursion to reuse styles using Style.process functions.
 
 
-styled : Maybe Device -> Rules -> List (Attribute msg)
+styled : Maybe Device -> Styler Rules msg
 styled device st =
+    let
+        fontSize n =
+            Maybe.map (.class >> scaledFont n) device
+                |> Maybe.withDefault Const.ui.fontSize.small
+    in
     case st of
         Button enabled ->
             [ padding Small
@@ -78,10 +85,15 @@ styled device st =
             [ Theme.on Theme.Primary
             ]
 
+        SmallFont ->
+            [ Font.size <| fontSize -2
+            ]
+
         -- Setup screens styles
         Setup ->
             Style.asA Panel (styled device)
                 |> Style.combined (Theme.for Theme.Surface)
+                |> Style.adding (Font.size <| fontSize 1)
 
         SetupButton enabled ->
             Style.asA (Button enabled) (styled device)
@@ -109,6 +121,7 @@ styled device st =
             Style.asA Label (styled device)
                 |> Style.adding Font.center
                 |> Style.adding (Background.color <| playerColor player)
+                |> Style.adding (Font.size <| fontSize 1)
                 |> Style.addingWhen (not enabled) (Element.alpha 0.3)
 
         PlayerButton player enabled ->
@@ -119,18 +132,19 @@ styled device st =
         Template ->
             [ Theme.color Theme.Background
             , Font.family [ Font.monospace ]
+            , Font.size <| fontSize 1
             ]
 
         TemplateFooter ->
             [ Background.color Const.colors.lightGray
             , padding Small
-            , Font.size Const.ui.fontSize.small
+            , Font.size <| fontSize -1
             , Font.center
             ]
 
         TemplateTitle ->
             [ Font.color Const.ui.themeColor.accentBackground
-            , Font.size Const.ui.fontSize.large
+            , Font.size <| fontSize 4
             ]
 
         _ ->

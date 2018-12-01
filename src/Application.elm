@@ -99,7 +99,7 @@ init : ( Model, Cmd Msg )
 init =
     let
         viewPortToWindowSize vp =
-            vp.scene
+            vp.viewport
                 |> (\s -> ( round s.width, round s.height ))
     in
     Return.singleton Model.default
