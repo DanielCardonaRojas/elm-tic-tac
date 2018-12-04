@@ -49,7 +49,7 @@ viewElement model =
         GamePlay ->
             Element.column [ Element.centerX, Element.spaceEvenly, width fill, height fill ]
                 [ score model
-                , maybe (Game.render [ Element.centerX, Element.centerY ] model.game) model.player
+                , maybe (Game.render [ Element.centerX, Element.centerY ] styler model.game) model.player
                 ]
                 |> templatePrimary
 
@@ -59,13 +59,18 @@ viewElement model =
 
 score : Model -> Element msg
 score model =
+    let
+        gameScore : Int -> String -> Player -> Element msg
+        gameScore s name p =
+            Game.score s (model.game.turn /= p) name p (Model.styler model)
+    in
     Element.row
         [ Element.centerX
         , Element.spaceEvenly
         , width fill
         ]
-        [ maybe (\p -> Game.score (Tuple.first model.score) (model.game.turn /= p) "You" p) model.player
-        , maybe (\p -> Game.score (Tuple.second model.score) (model.game.turn /= p) "Opponent" p) model.opponent
+        [ maybe (gameScore (Tuple.first model.score) "You") model.player
+        , maybe (gameScore (Tuple.second model.score) "Opponent") model.opponent
         ]
 
 

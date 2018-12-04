@@ -35,7 +35,7 @@ device model =
         }
 
 
-styler : Model -> Styler Rules Msg
+styler : Model -> Styler Rules msg
 styler model =
     device model
         |> Debug.log "Device"
