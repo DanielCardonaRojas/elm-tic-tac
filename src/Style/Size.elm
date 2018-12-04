@@ -1,13 +1,42 @@
-module Style.Spacing exposing (Edge(..), Spacing(..), length, padding, paddingEach, paddingXY, spacing)
+module Style.Size exposing
+    ( Edge(..)
+    , Size(..)
+    , length
+    , padding
+    , paddingEach
+    , paddingXY
+    , scaledFont
+    , spacing
+    )
 
 import Constants as Const
-import Element exposing (Attribute, Element)
+import Element exposing (Attribute, Device, DeviceClass(..), Element)
 
 
-type Spacing
+type Size
     = Small
     | Normal
     | Large
+
+
+scaledFont : Int -> DeviceClass -> Int
+scaledFont factor device =
+    let
+        scaled baseSize =
+            Element.modular (toFloat baseSize) 1.25 >> round
+    in
+    case device of
+        Phone ->
+            scaled Const.ui.fontSize.xlarge factor
+
+        Tablet ->
+            scaled Const.ui.fontSize.xlarge factor
+
+        Desktop ->
+            scaled Const.ui.fontSize.medium factor
+
+        BigDesktop ->
+            scaled Const.ui.fontSize.medium factor
 
 
 type Edge
@@ -17,7 +46,7 @@ type Edge
     | Bottom
 
 
-length : Spacing -> Int
+length : Size -> Int
 length s =
     case s of
         Small ->
@@ -30,7 +59,7 @@ length s =
             Const.ui.spacing.large
 
 
-paddingEach : Edge -> Spacing -> Attribute msg
+paddingEach : Edge -> Size -> Attribute msg
 paddingEach e s =
     let
         edges =
@@ -50,17 +79,17 @@ paddingEach e s =
             { edges | left = length s } |> Element.paddingEach
 
 
-paddingXY : Spacing -> Spacing -> Attribute msg
+paddingXY : Size -> Size -> Attribute msg
 paddingXY s1 s2 =
     Element.paddingXY (length s1) (length s2)
 
 
-padding : Spacing -> Attribute msg
+padding : Size -> Attribute msg
 padding s =
     paddingXY s s
 
 
-spacing : Spacing -> Attribute msg
+spacing : Size -> Attribute msg
 spacing s =
     length s
         |> Element.spacing

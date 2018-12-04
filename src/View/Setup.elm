@@ -5,7 +5,6 @@ import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
 import Html.Attributes
@@ -13,8 +12,8 @@ import Html.Events
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
-import Style.Process as Style
-import Style.Rules as Rules exposing (style)
+import Style.Process as Style exposing (Styler)
+import Style.Rules as Rules exposing (Rules)
 
 
 maybeIf : Bool -> a -> Maybe a
@@ -26,26 +25,26 @@ maybeIf b v =
         Nothing
 
 
-connection : Bool -> String -> Element Msg
-connection enabled room =
+connection : Bool -> String -> Styler Rules Msg -> Element Msg
+connection enabled room styler =
     let
         button txt msg clickable =
             Input.button
-                (Element.centerX :: width fill :: (style <| Rules.SetupButton clickable))
+                (Element.centerX :: width fill :: (styler <| Rules.SetupButton clickable))
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = maybeIf enabled msg
                 }
     in
-    Element.column (Element.centerX :: style Rules.Setup)
-        [ Input.text (style Rules.Textfield)
+    Element.column (Element.centerX :: styler Rules.Setup)
+        [ Input.text (styler Rules.Textfield)
             { onChange = String.trim >> String.toLower >> RoomSetup
             , placeholder = maybeIf enabled (Input.placeholder [] <| text "Enter room name")
-            , label = Input.labelAbove [ Font.size Const.ui.fontSize.medium ] <| text "Create a new match or join one"
+            , label = Input.labelAbove [] <| text "Create a new match or join one"
             , text = room
             }
         , button "Create Game" (CreateGame room) enabled
         , button "Join" (SelectRoom room) enabled
-        , el [ Element.centerX, Font.size Const.ui.fontSize.small ] <| text "Elm-Tic-Tac is a two player online 3D tic tac toe game"
+        , el (Element.centerX :: styler Rules.SmallFont) <| text "Start a 3D tic tac toe game"
         ]
 
 
