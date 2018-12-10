@@ -15,6 +15,7 @@ type Msg
     | NewGame Int
     | SetPlayer Player
     | SetOponent Player
+    | SetBoard Int
     | PlayAgain Int
     | SetupReady
     | WindowResize Int Int

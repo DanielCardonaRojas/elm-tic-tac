@@ -63,6 +63,7 @@ update msg model =
         RoomSetup str ->
             Return.singleton { model | scene = MatchSetup str }
 
+        -- Game
         PlayAgain n ->
             Return.singleton { model | game = Game.make n, player = model.opponent, opponent = model.player }
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
@@ -74,6 +75,11 @@ update msg model =
                 |> Return.map (\g -> { model | game = g })
                 |> Return.map updateScoreFromGame
                 |> Return.effect_ (emitInRoom "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
+
+        SetBoard k ->
+            Return.singleton model.game
+                |> Return.map (Game.updateSelected k)
+                |> Return.map (\g -> { model | game = g })
 
         -- PlayerChoose msgs
         SetPlayer p ->
@@ -103,13 +109,13 @@ init =
                 |> (\s -> ( round s.width, round s.height ))
     in
     Return.singleton Model.default
-        --|> Return.command (SocketIO.connect "http://localhost:8000")
         |> Return.command
             (Dom.getViewport
                 |> Task.attempt
                     (Result.map (viewPortToWindowSize >> uncurry WindowResize) >> Result.withDefault NoOp)
             )
-        |> Return.command (SocketIO.connect "")
+        |> Return.command (SocketIO.connect "http://localhost:8000")
+        --|> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "joinedGame")
         |> Return.command (SocketIO.listen "socketid")

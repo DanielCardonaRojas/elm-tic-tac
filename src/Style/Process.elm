@@ -1,4 +1,4 @@
-module Style.Process exposing (Styler, adding, addingWhen, asA, combined, when, with)
+module Style.Process exposing (Styler, adding, addingRule, addingWhen, asA, combined, combiningWhen, when, with)
 
 import Element exposing (Attribute, Element)
 
@@ -22,6 +22,15 @@ combined =
     List.append
 
 
+combiningWhen : Bool -> List (Attribute msg) -> List (Attribute msg) -> List (Attribute msg)
+combiningWhen b attrs ls =
+    if b then
+        ls ++ attrs
+
+    else
+        ls
+
+
 adding : Attribute msg -> List (Attribute msg) -> List (Attribute msg)
 adding =
     addingWhen True
@@ -29,11 +38,19 @@ adding =
 
 addingWhen : Bool -> Attribute msg -> List (Attribute msg) -> List (Attribute msg)
 addingWhen b attr ls =
-    if b then
-        ls ++ [ attr ]
+    combiningWhen b [ attr ] ls
 
-    else
-        ls
+
+
+-- | Give a styler returns a new styler that every time selector passed in the styles of rule will
+-- also be applied.
+
+
+addingRule : ( a, a ) -> Styler a msg -> Styler a msg
+addingRule ( selector, rule ) styler =
+    \a ->
+        styler a
+            |> combiningWhen (a == selector) (styler rule)
 
 
 when : Bool -> Attribute msg -> Attribute msg -> Attribute msg

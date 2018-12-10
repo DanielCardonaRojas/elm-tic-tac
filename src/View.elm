@@ -9,6 +9,9 @@ import Html.Attributes
 import Maybe.Extra as Maybe
 import Model exposing (..)
 import Msg exposing (Msg(..))
+import Style.Process as Style
+import Style.Rules as Rules exposing (Rules(..))
+import Style.Size exposing (Size(..))
 import View.Game as Game
 import View.Setup as Setup
 import View.Template as Template
@@ -47,9 +50,13 @@ viewElement model =
                 |> templateWithItems (el [] Element.none) roomInfo
 
         GamePlay ->
-            Element.column [ Element.centerX, Element.spaceEvenly, width fill, height fill ]
+            Element.column
+                ([ Element.centerX, width fill, height fill ]
+                    |> Style.combined (styler (Padded Normal))
+                    |> Style.combined (styler (Spaced Normal))
+                )
                 [ score model
-                , maybe (Game.render [ Element.centerX, Element.centerY ] styler model.game) model.player
+                , maybe (Game.render [ Element.centerX, Element.centerY, width fill, height fill ] styler model.game) model.player
                 ]
                 |> templatePrimary
 
