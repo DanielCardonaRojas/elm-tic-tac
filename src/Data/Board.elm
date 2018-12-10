@@ -46,7 +46,7 @@ type alias Spots =
 
 type Board
     = Board
-        { size : Int -- this determines the board will be nxn
+        { size : Int -- this determines the board will be NxNxN
         , moves : List Move3D
         , disabledBoards : List Int
         }

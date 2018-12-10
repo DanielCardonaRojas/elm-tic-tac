@@ -15,9 +15,17 @@ primary device styler html =
 
 withItems : Device -> Styler Rules msg -> Element msg -> Element msg -> Element msg -> Element msg
 withItems device styler topLeft topRight content =
+    let
+        top =
+            if device.class /= Tablet then
+                header
+
+            else
+                headerMobile
+    in
     Element.column
         (height fill :: width fill :: Element.spaceEvenly :: styler Rules.Template)
-        [ header styler topLeft topRight
+        [ top styler topLeft topRight
         , body content
         , footer styler |> hideWhen (device.class == Phone || device.class == Tablet)
         ]
@@ -45,6 +53,19 @@ header styler topLeft topRight =
         [ el [ Element.alignLeft, width fill ] topLeft
         , el (width fill :: Element.centerX :: Font.center :: styler Rules.TemplateTitle) <| text "Elm-Tic-Tac"
         , el [ Element.alignRight, width fill ] topRight
+        ]
+
+
+headerMobile : Styler Rules msg -> Element msg -> Element msg -> Element msg
+headerMobile styler topLeft topRight =
+    Element.column
+        (styler Rules.Section
+            |> Style.adding (width fill)
+            |> Style.adding Element.spaceEvenly
+        )
+        [ el [ width fill, Element.centerX, Font.center ] topLeft
+        , el (width fill :: Element.centerX :: Font.center :: styler Rules.TemplateTitle) <| text "Elm-Tic-Tac"
+        , el [ width fill, Element.centerX, Font.center ] topRight
         ]
 
 

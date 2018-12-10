@@ -1,7 +1,7 @@
 module View.Game exposing (render, score)
 
 import Constants as Const
-import Data.Game as Game exposing (Game, Status(..))
+import Data.Game as Game exposing (Game, Status(..), ViewMode(..))
 import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Element, el, fill, height, text, width)
 import Element.Input as Input
@@ -22,40 +22,47 @@ render attributes style game player =
                 { label = el [ Element.centerX ] <| text txt
                 , onPress = Just msg
                 }
+
+        container =
+            Element.column attributes
     in
     case game.status of
         Winner p moves ->
-            Element.column attributes
+            container
                 [ button "Rematch" (PlayAgain <| Game.size game)
                 , renderBoard (Game.lock game) player style
                 ]
 
         Tie ->
-            Element.column attributes
+            container
                 [ el [ Element.centerX ] <| text "Tie"
                 , button "Play Again" (PlayAgain 3)
                 , renderBoard (Game.lock game) player style
                 ]
 
         Playing ->
-            Element.column attributes
+            container
                 [ renderBoard game player style
                 ]
 
 
 renderBoard : Game -> Player -> Styler Rules Msg -> Element Msg
 renderBoard game nextPlayer style =
-    Board.render3D
-        (\pos ->
-            if game.turn == nextPlayer then
-                Just <| Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
+    let
+        tagger =
+            \pos ->
+                if game.turn == nextPlayer then
+                    Just <| Play { column = pos.column, row = pos.row, player = nextPlayer } pos.board
 
-            else
-                Nothing
-        )
-        game.board
-        style
-        |> el [ Element.centerX, Element.centerY ]
+                else
+                    Nothing
+    in
+    case game.viewMode of
+        Cubic ->
+            Board.render3D tagger game.board style
+
+        Single k ->
+            Board.renderFlat tagger SetBoard game.board k style
 
 
 score : Int -> Bool -> String -> Player -> Styler Rules msg -> Element msg

@@ -8,6 +8,7 @@ import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
 import Data.Room as Room
+import Element exposing (Attribute, Device, DeviceClass(..), Element)
 import Json.Encode as Encode exposing (Value)
 import Maybe.Extra as Maybe
 import Model exposing (..)
@@ -63,6 +64,7 @@ update msg model =
         RoomSetup str ->
             Return.singleton { model | scene = MatchSetup str }
 
+        -- Game
         PlayAgain n ->
             Return.singleton { model | game = Game.make n, player = model.opponent, opponent = model.player }
                 |> Return.map (\m -> { m | game = Game.enable (isCurrentPlayerTurn model) m.game })
@@ -74,6 +76,11 @@ update msg model =
                 |> Return.map (\g -> { model | game = g })
                 |> Return.map updateScoreFromGame
                 |> Return.effect_ (emitInRoom "move" <| Move.encode3D <| Move.fromMoveInBoard idx move)
+
+        SetBoard k ->
+            Return.singleton model.game
+                |> Return.map (Game.updateSelected k)
+                |> Return.map (\g -> { model | game = g })
 
         -- PlayerChoose msgs
         SetPlayer p ->
@@ -90,6 +97,17 @@ update msg model =
 
         WindowResize w h ->
             Return.singleton { model | windowSize = ( w, h ) }
+                |> Return.map
+                    (\m ->
+                        { m
+                            | game =
+                                if (Model.device m |> .class) == Tablet then
+                                    Game.updateSelected 0 m.game
+
+                                else
+                                    m.game
+                        }
+                    )
 
         NoOp ->
             Return.singleton model
@@ -103,12 +121,12 @@ init =
                 |> (\s -> ( round s.width, round s.height ))
     in
     Return.singleton Model.default
-        --|> Return.command (SocketIO.connect "http://localhost:8000")
         |> Return.command
             (Dom.getViewport
                 |> Task.attempt
                     (Result.map (viewPortToWindowSize >> uncurry WindowResize) >> Result.withDefault NoOp)
             )
+        --|> Return.command (SocketIO.connect "http://localhost:8000")
         |> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "joinedGame")

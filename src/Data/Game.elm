@@ -1,6 +1,7 @@
 module Data.Game exposing
     ( Game
     , Status(..)
+    , ViewMode(..)
     , enable
     , lock
     , make
@@ -8,6 +9,7 @@ module Data.Game exposing
     , switchTurn
     , unlock
     , update
+    , updateSelected
     )
 
 -- This module is a thin wrapper around Board module
@@ -25,11 +27,17 @@ type Status
     | Playing
 
 
+type ViewMode
+    = Single Int
+    | Cubic
+
+
 type alias Game =
     { board : Board
     , win : Maybe ( Player, List Spot )
     , status : Status
     , turn : Player
+    , viewMode : ViewMode
     }
 
 
@@ -39,6 +47,7 @@ make n =
     , win = Nothing
     , status = Playing
     , turn = PlayerX
+    , viewMode = Cubic
     }
 
 
@@ -60,6 +69,11 @@ update move idx game =
 
     else
         game
+
+
+updateSelected : Int -> Game -> Game
+updateSelected idx game =
+    { game | viewMode = Single idx }
 
 
 lock : Game -> Game

@@ -25,6 +25,13 @@ type Rules
     | Subtitle
     | Paragragh
     | Button Bool
+      -- Debug
+    | Class String
+      -- Padding and spacing
+    | Padded Size
+    | Spaced Size
+    | Skew Int
+      -- Generic
     | Panel
     | Section
     | Label
@@ -38,10 +45,12 @@ type Rules
     | PlayerButton Player Bool
     | Board
     | BoardCube
+    | BoardTab
     | Template
     | TemplateFooter
     | TemplateTitle
     | BoardTile (Maybe Player)
+    | BoardTilePreview (Maybe Player)
 
 
 style : Rules -> List (Attribute msg)
@@ -61,6 +70,15 @@ styled device st =
                 |> Maybe.withDefault Const.ui.fontSize.small
     in
     case st of
+        Padded size ->
+            [ padding size ]
+
+        Spaced size ->
+            [ spacing size ]
+
+        Skew angle ->
+            [ skew angle ]
+
         Button enabled ->
             [ padding Small
             , Border.rounded 5
@@ -89,6 +107,9 @@ styled device st =
             [ Font.size <| fontSize -2
             ]
 
+        Class str ->
+            [ class str ]
+
         -- Setup screens styles
         Setup ->
             Style.asA Panel (styled device)
@@ -102,20 +123,32 @@ styled device st =
 
         -- Board Styles
         Board ->
-            [ skew 35
-            ]
+            []
 
         BoardCube ->
             [ spacing Normal
             , Element.rotate <| degrees -20
+            , Element.centerX
+            , Element.width <| Element.maximum 200 Element.fill
+            ]
+
+        BoardTab ->
+            [ Background.color <| Element.rgba 0 0 0 0.7
+            , Font.color <| Element.rgb 1 1 1
+            , spacing Large
+            , paddingXY Normal Normal
             ]
 
         BoardTile m ->
             [ Background.color (Maybe.map playerColor m |> Maybe.withDefault Const.colors.lightGray)
             , Border.color <| Element.rgba 1 1 1 0
-            , Element.width <| Element.px 50
-            , Element.height <| Element.px 50
+            , Element.width <| Element.fillPortion 1
+            , Element.height <| Element.fillPortion 1
             ]
+
+        BoardTilePreview m ->
+            Style.asA (BoardTile m) (styled device)
+                |> Style.adding (Element.alpha 0.3)
 
         PlayerScore player enabled ->
             Style.asA Label (styled device)
@@ -158,6 +191,11 @@ styled device st =
 skew : Int -> Attribute msg
 skew degrees =
     Element.htmlAttribute <| Html.Attributes.style "transform" ("skew(" ++ String.fromInt degrees ++ "deg)")
+
+
+class : String -> Attribute msg
+class name =
+    Element.htmlAttribute <| Html.Attributes.class name
 
 
 playerColor player =
