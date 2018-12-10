@@ -8,6 +8,7 @@ import Data.Game as Game exposing (Game)
 import Data.Move as Move exposing (Move)
 import Data.Player as Player exposing (Player)
 import Data.Room as Room
+import Element exposing (Attribute, Device, DeviceClass(..), Element)
 import Json.Encode as Encode exposing (Value)
 import Maybe.Extra as Maybe
 import Model exposing (..)
@@ -96,6 +97,17 @@ update msg model =
 
         WindowResize w h ->
             Return.singleton { model | windowSize = ( w, h ) }
+                |> Return.map
+                    (\m ->
+                        { m
+                            | game =
+                                if (Model.device m |> .class) == Tablet then
+                                    Game.updateSelected 0 m.game
+
+                                else
+                                    m.game
+                        }
+                    )
 
         NoOp ->
             Return.singleton model
@@ -114,8 +126,8 @@ init =
                 |> Task.attempt
                     (Result.map (viewPortToWindowSize >> uncurry WindowResize) >> Result.withDefault NoOp)
             )
-        |> Return.command (SocketIO.connect "http://localhost:8000")
-        --|> Return.command (SocketIO.connect "")
+        --|> Return.command (SocketIO.connect "http://localhost:8000")
+        |> Return.command (SocketIO.connect "")
         |> Return.command (SocketIO.listen "move")
         |> Return.command (SocketIO.listen "joinedGame")
         |> Return.command (SocketIO.listen "socketid")

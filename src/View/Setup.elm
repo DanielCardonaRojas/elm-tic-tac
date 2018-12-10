@@ -77,4 +77,5 @@ playerPicker model =
 
 roomInfo : List (Attribute Msg) -> String -> Element Msg
 roomInfo attrs roomName =
-    el attrs <| text ("Connected to room: " ++ roomName)
+    Element.paragraph attrs
+        [ text ("Connected to room: " ++ roomName) ]

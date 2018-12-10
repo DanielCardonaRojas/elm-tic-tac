@@ -4,7 +4,7 @@ module View exposing (view)
 
 import Constants as Const
 import Data.Player as Player exposing (Player(..))
-import Element exposing (Attribute, Element, el, fill, height, text, width)
+import Element exposing (Attribute, Device, DeviceClass(..), Element, el, fill, height, text, width)
 import Html.Attributes
 import Maybe.Extra as Maybe
 import Model exposing (..)
@@ -25,7 +25,7 @@ viewElement : Model -> Element Msg
 viewElement model =
     let
         roomInfo =
-            maybe (Setup.roomInfo [ Element.alignRight ]) model.room
+            maybe (Setup.roomInfo []) model.room
 
         styler =
             Model.styler model
@@ -35,6 +35,34 @@ viewElement model =
 
         templatePrimary =
             Template.primary (Model.device model) styler
+
+        gameAttrs =
+            let
+                deviceClass =
+                    Model.device model |> .class
+
+                maxDim =
+                    max (model.windowSize |> Tuple.first) (model.windowSize |> Tuple.second)
+
+                sizeFor class =
+                    case class of
+                        Phone ->
+                            0.4 * toFloat maxDim |> round
+
+                        Desktop ->
+                            0.37 * toFloat maxDim |> round
+
+                        BigDesktop ->
+                            0.33 * toFloat maxDim |> round
+
+                        Tablet ->
+                            0.4 * toFloat maxDim |> round
+            in
+            [ Element.width <| Element.px (sizeFor deviceClass)
+            , Element.height <| Element.px (sizeFor deviceClass)
+            , Element.centerX
+            , Element.centerY
+            ]
     in
     case model.scene of
         MatchSetup str ->
@@ -56,7 +84,7 @@ viewElement model =
                     |> Style.combined (styler (Spaced Normal))
                 )
                 [ score model
-                , maybe (Game.render [ Element.centerX, Element.centerY, width fill, height fill ] styler model.game) model.player
+                , maybe (Game.render gameAttrs styler model.game) model.player
                 ]
                 |> templatePrimary
 
