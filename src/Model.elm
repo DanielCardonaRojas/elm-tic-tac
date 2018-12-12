@@ -37,9 +37,10 @@ device model =
 
 styler : Model -> Styler Rules msg
 styler model =
-    device model
-        |> Debug.log "Device"
-        |> Just
+    { width = model.windowSize |> Tuple.first
+    , height = model.windowSize |> Tuple.second
+    }
+        |> Debug.log "Device Size"
         |> Style.styled
 
 

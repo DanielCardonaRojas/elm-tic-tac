@@ -35,34 +35,6 @@ viewElement model =
 
         templatePrimary =
             Template.primary (Model.device model) styler
-
-        gameAttrs =
-            let
-                deviceClass =
-                    Model.device model |> .class
-
-                maxDim =
-                    max (model.windowSize |> Tuple.first) (model.windowSize |> Tuple.second)
-
-                sizeFor class =
-                    case class of
-                        Phone ->
-                            0.4 * toFloat maxDim |> round
-
-                        Desktop ->
-                            0.37 * toFloat maxDim |> round
-
-                        BigDesktop ->
-                            0.33 * toFloat maxDim |> round
-
-                        Tablet ->
-                            0.4 * toFloat maxDim |> round
-            in
-            [ Element.width <| Element.px (sizeFor deviceClass)
-            , Element.height <| Element.px (sizeFor deviceClass)
-            , Element.centerX
-            , Element.centerY
-            ]
     in
     case model.scene of
         MatchSetup str ->
@@ -84,7 +56,7 @@ viewElement model =
                     |> Style.combined (styler (Spaced Normal))
                 )
                 [ score model
-                , maybe (Game.render gameAttrs styler model.game) model.player
+                , maybe (Game.render [] styler model.game) model.player
                 ]
                 |> templatePrimary
 

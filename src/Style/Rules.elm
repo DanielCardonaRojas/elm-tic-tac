@@ -1,10 +1,10 @@
 module Style.Rules exposing
     ( Rules(..)
-    , style
     , styled
     )
 
 import Constants as Const
+import Data.Game as Game exposing (ViewMode(..))
 import Data.Player as Player exposing (Player(..))
 import Element exposing (Attribute, Device, DeviceClass(..), Element)
 import Element.Background as Background
@@ -43,8 +43,9 @@ type Rules
     | SetupButton Bool
     | PlayerScore Player Bool -- Player and isCurrentPlayer flag.
     | PlayerButton Player Bool
-    | Board
     | BoardCube
+    | Board -- Overall styles to board
+    | BoardSingle ViewMode -- Dims of board depending of rendering mode.
     | BoardTab
     | Template
     | TemplateFooter
@@ -53,21 +54,24 @@ type Rules
     | BoardTilePreview (Maybe Player)
 
 
-style : Rules -> List (Attribute msg)
-style =
-    styled Nothing
-
-
 
 --| Use recursion to reuse styles using Style.process functions.
 
 
-styled : Maybe Device -> Styler Rules msg
-styled device st =
+styled : { width : Int, height : Int } -> Styler Rules msg
+styled dims st =
     let
+        device =
+            Element.classifyDevice dims
+
         fontSize n =
-            Maybe.map (.class >> scaledFont n) device
-                |> Maybe.withDefault Const.ui.fontSize.small
+            (.class >> scaledFont n) device
+
+        self =
+            styled dims
+
+        maxDim =
+            min dims.width dims.height
     in
     case st of
         Padded size ->
@@ -112,24 +116,33 @@ styled device st =
 
         -- Setup screens styles
         Setup ->
-            Style.asA Panel (styled device)
+            Style.asA Panel self
                 |> Style.combined (Theme.for Theme.Surface)
                 |> Style.adding (Font.size <| fontSize 1)
 
         SetupButton enabled ->
-            Style.asA (Button enabled) (styled device)
+            Style.asA (Button enabled) self
                 |> Style.adding (Background.color Const.colors.lightSalmon)
                 |> Style.adding (Theme.on Theme.Surface)
 
         -- Board Styles
         Board ->
-            []
+            self <| Class "myboard"
+
+        BoardSingle mode ->
+            [ Element.width <| Element.px <| singleBoardSize device.class maxDim mode
+            , Element.height <| Element.px <| singleBoardSize device.class maxDim mode
+            , Element.centerX
+            ]
+                |> Style.combined (self <| Class "xoboard")
 
         BoardCube ->
             [ spacing Normal
             , Element.rotate <| degrees -20
             , Element.centerX
             , Element.width <| Element.maximum 200 Element.fill
+            , Element.width Element.fill
+            , Element.height Element.fill
             ]
 
         BoardTab ->
@@ -147,18 +160,18 @@ styled device st =
             ]
 
         BoardTilePreview m ->
-            Style.asA (BoardTile m) (styled device)
+            Style.asA (BoardTile m) self
                 |> Style.adding (Element.alpha 0.3)
 
         PlayerScore player enabled ->
-            Style.asA Label (styled device)
+            Style.asA Label self
                 |> Style.adding Font.center
                 |> Style.adding (Background.color <| playerColor player)
                 |> Style.adding (Font.size <| fontSize 1)
                 |> Style.addingWhen (not enabled) (Element.alpha 0.3)
 
         PlayerButton player enabled ->
-            Style.asA (Button enabled) (styled device)
+            Style.asA (Button enabled) self
                 |> Style.adding (Background.color <| playerColor player)
 
         -- Template Styles
@@ -186,6 +199,32 @@ styled device st =
 
 
 -- Helpers
+
+
+singleBoardSize deviceClass maxDim viewMode =
+    let
+        adjustCubicSize s =
+            if viewMode == Cubic then
+                s / 1.5
+
+            else
+                s
+
+        scaleSize factor =
+            (factor * toFloat maxDim) |> adjustCubicSize |> round
+    in
+    case deviceClass of
+        Phone ->
+            scaleSize 0.38
+
+        Tablet ->
+            scaleSize 0.35
+
+        Desktop ->
+            scaleSize 0.3
+
+        BigDesktop ->
+            scaleSize 0.2
 
 
 skew : Int -> Attribute msg

@@ -24,7 +24,7 @@ render attributes style game player =
                 }
 
         container =
-            Element.column attributes
+            Element.column [ Element.centerX, Element.centerY, width fill, height fill ]
     in
     case game.status of
         Winner p moves ->

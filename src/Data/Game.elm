@@ -5,6 +5,7 @@ module Data.Game exposing
     , enable
     , lock
     , make
+    , rematch
     , size
     , switchTurn
     , unlock
@@ -49,6 +50,11 @@ make n =
     , turn = PlayerX
     , viewMode = Cubic
     }
+
+
+rematch : Int -> Game -> Game
+rematch n game =
+    { game | board = Board.make n }
 
 
 switchTurn : Game -> Game

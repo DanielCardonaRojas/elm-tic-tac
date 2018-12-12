@@ -1,4 +1,16 @@
-module Style.Process exposing (Styler, adding, addingRule, addingWhen, asA, combined, combiningWhen, when, with)
+module Style.Process exposing
+    ( Styler
+    , adding
+    , addingRule
+    , addingRules
+    , addingWhen
+    , asA
+    , combined
+    , combiningWhen
+    , omittingRules
+    , when
+    , with
+    )
 
 import Element exposing (Attribute, Element)
 
@@ -46,11 +58,28 @@ addingWhen b attr ls =
 -- also be applied.
 
 
+omittingRules : List a -> Styler a msg -> Styler a msg
+omittingRules blacklist styler =
+    \r ->
+        if List.member r blacklist then
+            []
+
+        else
+            styler r
+
+
 addingRule : ( a, a ) -> Styler a msg -> Styler a msg
 addingRule ( selector, rule ) styler =
     \a ->
         styler a
             |> combiningWhen (a == selector) (styler rule)
+
+
+addingRules : ( a, List a ) -> Styler a msg -> Styler a msg
+addingRules ( selector, rule ) styler =
+    \a ->
+        styler a
+            |> combiningWhen (a == selector) (List.map styler rule |> List.concat)
 
 
 when : Bool -> Attribute msg -> Attribute msg -> Attribute msg

@@ -17,6 +17,7 @@ type Size
     = Small
     | Normal
     | Large
+    | XLarge
 
 
 scaledFont : Int -> DeviceClass -> Int
@@ -57,6 +58,9 @@ length s =
 
         Large ->
             Const.ui.spacing.large
+
+        XLarge ->
+            Const.ui.spacing.xLarge
 
 
 paddingEach : Edge -> Size -> Attribute msg
