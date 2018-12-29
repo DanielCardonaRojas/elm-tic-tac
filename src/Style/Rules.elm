@@ -167,7 +167,7 @@ styled dims st =
             Style.asA Label self
                 |> Style.adding Font.center
                 |> Style.adding (Background.color <| playerColor player)
-                |> Style.adding (Font.size <| fontSize 1)
+                |> Style.adding (Font.size <| fontSize -2)
                 |> Style.addingWhen (not enabled) (Element.alpha 0.3)
 
         PlayerButton player enabled ->

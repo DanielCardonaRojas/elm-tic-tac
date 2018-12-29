@@ -54,7 +54,7 @@ make n =
 
 rematch : Int -> Game -> Game
 rematch n game =
-    { game | board = Board.make n }
+    { game | board = Board.make n, turn = Player.switch game.turn, status = Playing }
 
 
 switchTurn : Game -> Game

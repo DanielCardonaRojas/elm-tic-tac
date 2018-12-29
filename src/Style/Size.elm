@@ -24,20 +24,20 @@ scaledFont : Int -> DeviceClass -> Int
 scaledFont factor device =
     let
         scaled baseSize =
-            Element.modular (toFloat baseSize) 1.25 >> round
+            Element.modular (toFloat baseSize) 1.2 >> round
     in
     case device of
         Phone ->
-            scaled Const.ui.fontSize.xlarge factor
+            scaled 48 factor
 
         Tablet ->
-            scaled Const.ui.fontSize.xlarge factor
+            scaled 48 factor
 
         Desktop ->
-            scaled Const.ui.fontSize.medium factor
+            scaled 20 factor
 
         BigDesktop ->
-            scaled Const.ui.fontSize.medium factor
+            scaled 20 factor
 
 
 type Edge
